@@ -1,4 +1,4 @@
-package com.alejandroacg.choicebound.interfaces;
+package com.alejandroacg.choicebound;
 
 public interface PlatformBridge {
     void showGoogleButton();
