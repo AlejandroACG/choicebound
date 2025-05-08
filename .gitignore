@@ -16,6 +16,7 @@ gradle-app.setting
 /shared/build/
 
 android/auth.properties
+android/google-services.json
 
 ## Firebase:
 /android/*.json
