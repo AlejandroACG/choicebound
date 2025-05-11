@@ -87,21 +87,18 @@ public class SplashScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(0, 0, 0, 1); // Fondo negro
+        Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // Retraso de 1.25 segundos antes de comenzar la animación
         if (!isAnimationStarted) {
             delayTime += Gdx.graphics.getDeltaTime();
-            if (delayTime >= 1.25f) { // Retraso de 1.25 segundos
+            if (delayTime >= 2.9f) {
                 isAnimationStarted = true;
-                Gdx.app.log("SplashScreen", "Retraso terminado, comenzando animación");
             }
-            return; // No renderiza nada durante el retraso
+            return;
         }
 
         if (!isAnimationFinished) {
-            // Reproduce la animación
             animationTime += Gdx.graphics.getDeltaTime();
             if (animationTime >= introAnimation.getAnimationDuration()) { // Termina cuando la animación llega al final
                 isAnimationFinished = true;
