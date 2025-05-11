@@ -2,6 +2,7 @@ package com.alejandroacg.choicebound;
 
 import com.alejandroacg.choicebound.interfaces.PlatformBridge;
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Screen;
 
 public class ChoiceboundGame extends Game {
     private final PlatformBridge platformBridge;
@@ -28,5 +29,9 @@ public class ChoiceboundGame extends Game {
     public void dispose() {
         super.dispose();
         resourceManager.dispose();
+    }
+
+    public Screen getCurrentScreen() {
+        return getScreen();
     }
 }

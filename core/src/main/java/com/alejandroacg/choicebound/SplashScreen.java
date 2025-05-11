@@ -103,7 +103,8 @@ public class SplashScreen implements Screen {
             if (animationTime >= introAnimation.getAnimationDuration()) { // Termina cuando la animación llega al final
                 isAnimationFinished = true;
                 lastFrame = introAnimation.getKeyFrame(introAnimation.getAnimationDuration());
-                game.getPlatformBridge().showGoogleButton();
+                Gdx.app.log("SplashScreen", "Animación terminada, creando botón de Google");
+                game.getPlatformBridge().createGoogleButton();
             }
 
             // Fade-in durante 2 segundos (como lo ajustaste)
@@ -137,6 +138,19 @@ public class SplashScreen implements Screen {
             }
             batch.end();
         }
+    }
+
+    public void onLoginSuccess() {
+        Gdx.app.log("SplashScreen", "Login exitoso, cambiando a la pantalla principal");
+        game.setScreen(new HomeScreen(game));
+        // Destruir el botón de login
+        game.getPlatformBridge().destroyGoogleButton();
+    }
+
+    public void onLoginFailure(String errorMessage) {
+        Gdx.app.log("SplashScreen", "Fallo en el login: " + errorMessage);
+        // Aquí podrías mostrar un mensaje de error al usuario
+        // Por ejemplo, usando una UI de LibGDX (Scene2D) para mostrar un mensaje
     }
 
     @Override
