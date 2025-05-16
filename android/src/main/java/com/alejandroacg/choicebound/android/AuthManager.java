@@ -1,5 +1,8 @@
 package com.alejandroacg.choicebound.android;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -75,6 +78,15 @@ public class AuthManager {
                 googleButton = null;
             }
         });
+    }
+
+    public boolean hasInternetConnection() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager != null) {
+            NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
+            return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+        }
+        return false;
     }
 
     private void startOneTapSignIn() {

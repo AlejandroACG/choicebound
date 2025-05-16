@@ -305,3 +305,7 @@ frame96
 bounds:2578,3422,320,568
 frame99
 bounds:968,2282,320,568
+google_button_up
+bounds:2900,1958,700,160
+google_button_down
+bounds:2900,2120,700,160

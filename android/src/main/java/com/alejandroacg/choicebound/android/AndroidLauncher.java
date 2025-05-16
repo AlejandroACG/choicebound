@@ -47,4 +47,9 @@ public class AndroidLauncher extends AndroidApplication implements PlatformBridg
     public void destroyGoogleButton() {
         authManager.destroyGoogleButton();
     }
+
+    @Override
+    public boolean hasInternetConnection() {
+        return authManager.hasInternetConnection();
+    }
 }

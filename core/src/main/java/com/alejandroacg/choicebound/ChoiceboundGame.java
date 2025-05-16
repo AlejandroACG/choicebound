@@ -21,7 +21,7 @@ public class ChoiceboundGame extends Game {
         resourceManager = new ResourceManager();
         resourceManager.loadSplashAssets();
         while (!resourceManager.update()) {}
-
+        GameConfig.initialize();
         setScreen(new SplashScreen(this, resourceManager));
     }
 
