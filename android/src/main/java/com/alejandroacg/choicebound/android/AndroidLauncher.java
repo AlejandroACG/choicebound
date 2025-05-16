@@ -33,19 +33,14 @@ public class AndroidLauncher extends AndroidApplication implements PlatformBridg
         layout.addView(gameView);
 
         // Inicializa AuthManager
-        authManager = new AuthManager(this, choiceboundGame, layout);
+        authManager = new AuthManager(this, choiceboundGame);
 
         setContentView(layout);
     }
 
     @Override
-    public void createGoogleButton() {
-        authManager.createGoogleButton();
-    }
-
-    @Override
-    public void destroyGoogleButton() {
-        authManager.destroyGoogleButton();
+    public void startOneTapSignIn() {
+        authManager.startOneTapSignIn();
     }
 
     @Override

@@ -26,16 +26,13 @@ import java.util.concurrent.Executors;
 public class AuthManager {
     private final AndroidLauncher activity;
     private final ChoiceboundGame game;
-    private Button googleButton;
     private final FirebaseAuth mAuth;
     private final CredentialManager credentialManager;
     private final Executor executor;
-    private final FrameLayout layout;
 
-    public AuthManager(AndroidLauncher activity, ChoiceboundGame game, FrameLayout layout) {
+    public AuthManager(AndroidLauncher activity, ChoiceboundGame game) {
         this.activity = activity;
         this.game = game;
-        this.layout = layout;
 
         // Inicializa Firebase
         mAuth = FirebaseAuth.getInstance();
@@ -44,40 +41,6 @@ public class AuthManager {
         credentialManager = CredentialManager.create(activity);
         executor = Executors.newSingleThreadExecutor();
 
-        // No creamos el botón aquí, lo haremos dinámicamente en createGoogleButton
-        googleButton = null;
-    }
-
-    public void createGoogleButton() {
-        activity.runOnUiThread(() -> {
-            // Solo creamos el botón si no existe
-            if (googleButton == null) {
-                googleButton = new Button(activity);
-                googleButton.setText("Sign in with Google");
-
-                FrameLayout.LayoutParams buttonParams = new FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                );
-                buttonParams.gravity = Gravity.CENTER_HORIZONTAL;
-                buttonParams.topMargin = (int) (activity.getResources().getDisplayMetrics().heightPixels * 0.60);
-                googleButton.setLayoutParams(buttonParams);
-
-                layout.addView(googleButton);
-
-                // Configura el clic del botón para iniciar el flujo de One Tap Sign-In
-                googleButton.setOnClickListener(v -> startOneTapSignIn());
-            }
-        });
-    }
-
-    public void destroyGoogleButton() {
-        activity.runOnUiThread(() -> {
-            if (googleButton != null) {
-                layout.removeView(googleButton);
-                googleButton = null;
-            }
-        });
     }
 
     public boolean hasInternetConnection() {
@@ -89,7 +52,7 @@ public class AuthManager {
         return false;
     }
 
-    private void startOneTapSignIn() {
+    public void startOneTapSignIn() {
         // Configura las opciones de Google Sign-In
         GetGoogleIdOption googleIdOption = new GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false) // Permite seleccionar cualquier cuenta de Google

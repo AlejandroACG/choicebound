@@ -3,15 +3,16 @@ package com.alejandroacg.choicebound;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -96,11 +97,19 @@ public class SplashScreen implements Screen {
         buttonStyle.font.getData().setScale(1.5f);
 
         // Crear un TextButton con el estilo dinámico
-        // TODO Encontrar una manera más elegante de alinear el texto en horizontal.
         TextButton googleButton = new TextButton("     " + GameConfig.getString("sign_in_with_google"), buttonStyle);
 
         // Forzar que el botón calcule su tamaño
         googleButton.pack();
+
+        // Añadir un ChangeListener para manejar clics
+        googleButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                Gdx.app.log("SplashScreen", "Botón pulsado, iniciando One Tap Sign-In");
+                game.getPlatformBridge().startOneTapSignIn();
+            }
+        });
 
         // Envolver el botón en un Container para hacerlo interactivo
         buttonContainer = new Container<>(googleButton);
@@ -108,19 +117,6 @@ public class SplashScreen implements Screen {
         buttonContainer.pack();
         // Centrar horizontalmente y mover más abajo
         buttonContainer.setPosition(Gdx.graphics.getWidth() / 2f - buttonContainer.getWidth() / 2, Gdx.graphics.getHeight() * 0.3f);
-        ClickListener listener = new ClickListener() {
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                return true;
-            }
-
-            @Override
-            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                Gdx.app.log("SplashScreen", "Botón de LibGDX pulsado");
-            }
-        };
-        listener.setVisualPressed(false);
-        buttonContainer.addListener(listener);
 
         stage.addActor(buttonContainer);
     }
@@ -128,8 +124,6 @@ public class SplashScreen implements Screen {
     public void onLoginSuccess() {
         Gdx.app.log("SplashScreen", "Login exitoso, cambiando a la pantalla principal");
         game.setScreen(new HomeScreen(game));
-        // Destruir el botón de login
-        game.getPlatformBridge().destroyGoogleButton();
     }
 
     public void onLoginFailure(String errorMessage) {

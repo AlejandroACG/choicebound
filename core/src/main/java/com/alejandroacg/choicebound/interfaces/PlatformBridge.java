@@ -1,7 +1,6 @@
 package com.alejandroacg.choicebound.interfaces;
 
 public interface PlatformBridge {
-    void createGoogleButton();
-    void destroyGoogleButton();
+    void startOneTapSignIn();
     boolean hasInternetConnection();
 }
