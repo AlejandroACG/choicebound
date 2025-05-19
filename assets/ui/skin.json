@@ -1,0 +1,24 @@
+{
+  "com.badlogic.gdx.graphics.g2d.BitmapFont": {
+    "roboto": { "file": "fonts/roboto.fnt" },
+    "crimson_text": { "file": "fonts/crimson_text.fnt" },
+    "cinzel": { "file": "fonts/cinzel.fnt" }
+  },
+  "com.badlogic.gdx.graphics.Color": {
+    "black": { "r": 0, "g": 0, "b": 0, "a": 1 }
+  },
+  "com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle": {
+    "google": {
+      "font": "roboto",
+      "fontColor": "black"
+    },
+    "roleplay_narrative": {
+      "font": "crimson_text",
+      "fontColor": "black"
+    },
+    "roleplay_title": {
+      "font": "cinzel",
+      "fontColor": "black"
+    }
+  }
+}

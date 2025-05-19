@@ -13,8 +13,8 @@ public class ResourceManager {
 
     // Carga los assets necesarios para el splash
     public void loadSplashAssets() {
-        manager.load("intro/intro.atlas", TextureAtlas.class);
-        manager.load("music/main_menu.mp3", Music.class);
+        manager.load("textures/intro.atlas", TextureAtlas.class);
+        manager.load("sounds/main_menu.mp3", Music.class);
     }
 
     // Carga los assets necesarios para el resto del juego
@@ -33,11 +33,11 @@ public class ResourceManager {
 
     // Acceso a los assets cargados
     public TextureAtlas getIntroAtlas() {
-        return manager.get("intro/intro.atlas", TextureAtlas.class);
+        return manager.get("textures/intro.atlas", TextureAtlas.class);
     }
 
     public Music getMainMenuMusic() {
-        return manager.get("music/main_menu.mp3", Music.class);
+        return manager.get("sounds/main_menu.mp3", Music.class);
     }
 
     public void dispose() {

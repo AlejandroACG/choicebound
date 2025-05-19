@@ -9,7 +9,7 @@ public class GameConfig {
     private static I18NBundle strings;
 
     public static void initialize() {
-        strings = I18NBundle.createBundle(Gdx.files.internal("strings"), new Locale("es"));
+        strings = I18NBundle.createBundle(Gdx.files.internal("i18n/strings"), new Locale("es"));
     }
 
     public static String getString(String key) {

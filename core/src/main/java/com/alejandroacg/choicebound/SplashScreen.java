@@ -8,13 +8,9 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import java.util.ArrayList;
@@ -30,11 +26,10 @@ public class SplashScreen implements Screen {
     private boolean isAnimationStarted, isAnimationFinished, isGameAssetsLoaded;
     private TextureRegion lastFrame;
     private Music mainMenuMusic;
-    private Image googleLogoImage;
-    private TextButton googleButton;
     private Skin skin;
     private Container<Table> buttonContainer;
-    private Table buttonTable;
+    private ConnectivityChecker connectivityChecker;
+    private ButtonHandler buttonHandler;
 
     public SplashScreen(ChoiceboundGame game, ResourceManager assetLoader) {
         this.game = game;
@@ -81,33 +76,23 @@ public class SplashScreen implements Screen {
         assetLoader.loadGameAssets();
 
         Gdx.input.setInputProcessor(stage);
-        skin = new Skin(Gdx.files.internal("skin.json"));
+        skin = new Skin(Gdx.files.internal("ui/skin.json"));
+        this.connectivityChecker = new ConnectivityChecker(game.getPlatformBridge(), skin);
+        this.buttonHandler = new ButtonHandler(resourceManager, skin);
     }
 
     private void createGoogleButton() {
-        // Crear el estilo del TextButton dinámicamente
-        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
-        Label.LabelStyle labelStyle = skin.get("google", Label.LabelStyle.class);
-        buttonStyle.font = labelStyle.font;
-        buttonStyle.fontColor = labelStyle.fontColor;
-        buttonStyle.up = new TextureRegionDrawable(resourceManager.getIntroAtlas().findRegion("google_button_up"));
-        buttonStyle.down = new TextureRegionDrawable(resourceManager.getIntroAtlas().findRegion("google_button_down"));
-
-        // Escalar la fuente para que la letra sea más grande
-        buttonStyle.font.getData().setScale(1.5f);
-
-        // Crear un TextButton con el estilo dinámico
-        TextButton googleButton = new TextButton("     " + GameConfig.getString("sign_in_with_google"), buttonStyle);
-
-        // Forzar que el botón calcule su tamaño
-        googleButton.pack();
+        // Crear el botón usando ButtonHandler
+        TextButton googleButton = buttonHandler.createGoogleButton();
 
         // Añadir un ChangeListener para manejar clics
         googleButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 Gdx.app.log("SplashScreen", "Botón pulsado, iniciando One Tap Sign-In");
-                game.getPlatformBridge().startOneTapSignIn();
+                if (connectivityChecker.checkConnectivity(stage)) {
+                    game.getPlatformBridge().startOneTapSignIn();
+                }
             }
         });
 
