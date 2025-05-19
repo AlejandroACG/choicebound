@@ -2,10 +2,13 @@
   "com.badlogic.gdx.graphics.g2d.BitmapFont": {
     "roboto": { "file": "fonts/roboto.fnt" },
     "crimson_text": { "file": "fonts/crimson_text.fnt" },
-    "cinzel": { "file": "fonts/cinzel.fnt" }
+    "cinzel": { "file": "fonts/cinzel.fnt" },
+    "alegreya": { "file": "fonts/alegreya.fnt" }
   },
   "com.badlogic.gdx.graphics.Color": {
-    "black": { "r": 0, "g": 0, "b": 0, "a": 1 }
+    "black": { "r": 0, "g": 0, "b": 0, "a": 1 },
+    "white": { "r": 1, "g": 1, "b": 1, "a": 1 },
+    "black_semi_transparent": { "r": 0, "g": 0, "b": 0, "a": 0.75 }
   },
   "com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle": {
     "google": {
@@ -16,9 +19,17 @@
       "font": "crimson_text",
       "fontColor": "black"
     },
-    "roleplay_title": {
+    "roleplay_button": {
       "font": "cinzel",
       "fontColor": "black"
+    },
+    "roleplay_title": {
+      "font": "alegreya",
+      "fontColor": "black"
+    },
+    "error_message": {
+      "font": "roboto",
+      "fontColor": "white"
     }
   }
 }
