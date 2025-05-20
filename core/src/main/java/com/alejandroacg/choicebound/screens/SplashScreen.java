@@ -1,21 +1,21 @@
 package com.alejandroacg.choicebound.screens;
 
-import com.alejandroacg.choicebound.ui.ButtonHandler;
-import com.alejandroacg.choicebound.ChoiceboundGame;
-import com.alejandroacg.choicebound.utils.ConnectivityChecker;
-import com.alejandroacg.choicebound.resources.ResourceManager;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.alejandroacg.choicebound.ChoiceboundGame;
+import com.alejandroacg.choicebound.resources.ResourceManager;
+import com.alejandroacg.choicebound.ui.ButtonHandler;
+import com.alejandroacg.choicebound.utils.ConnectivityChecker;
 
 import java.util.ArrayList;
 
@@ -29,11 +29,10 @@ public class SplashScreen implements Screen {
     private float delayTime;
     private boolean isAnimationStarted, isAnimationFinished, isGameAssetsLoaded;
     private TextureRegion lastFrame;
-    private Music mainMenuMusic;
-    private Skin skin;
     private Container<Table> buttonContainer;
     private ConnectivityChecker connectivityChecker;
     private ButtonHandler buttonHandler;
+    private Group loginOverlay;
 
     public SplashScreen(ChoiceboundGame game, ResourceManager assetLoader) {
         this.game = game;
@@ -67,44 +66,29 @@ public class SplashScreen implements Screen {
         introAnimation = new Animation<>(1f / 25f, frames);
         introAnimation.setPlayMode(Animation.PlayMode.NORMAL);
 
-        try {
-            mainMenuMusic = assetLoader.getMainMenuMusic();
-            if (mainMenuMusic != null) {
-                mainMenuMusic.setLooping(true);
-                mainMenuMusic.play();
-            }
-        } catch (Exception e) {
-            Gdx.app.error("SplashScreen", "Error al reproducir música: " + e.getMessage());
-        }
-
         assetLoader.loadGameAssets();
 
         Gdx.input.setInputProcessor(stage);
-        skin = new Skin(Gdx.files.internal("ui/skin.json"));
-        this.connectivityChecker = new ConnectivityChecker(game.getPlatformBridge(), skin, game.getOverlayManager());
-        this.buttonHandler = new ButtonHandler(resourceManager, skin);
+        this.connectivityChecker = new ConnectivityChecker(game.getPlatformBridge(), game.getSkin(), game.getOverlayManager());
+        this.buttonHandler = new ButtonHandler(resourceManager, game.getSkin());
     }
 
     private void createGoogleButton() {
-        // Crear el botón usando ButtonHandler
         TextButton googleButton = buttonHandler.createGoogleButton();
 
-        // Añadir un ChangeListener para manejar clics
         googleButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 Gdx.app.log("SplashScreen", "Botón pulsado, iniciando One Tap Sign-In");
                 if (connectivityChecker.checkConnectivity(stage)) {
+                    loginOverlay = game.getOverlayManager().showOverlay(stage);
                     game.getPlatformBridge().startOneTapSignIn();
                 }
             }
         });
 
-        // Envolver el botón en un Container para hacerlo interactivo
         buttonContainer = new Container<>(googleButton);
-        // Ajustar el tamaño del contenedor al del botón
         buttonContainer.pack();
-        // Centrar horizontalmente y mover más abajo
         buttonContainer.setPosition(Gdx.graphics.getWidth() / 2f - buttonContainer.getWidth() / 2, Gdx.graphics.getHeight() * 0.3f);
 
         stage.addActor(buttonContainer);
@@ -117,8 +101,28 @@ public class SplashScreen implements Screen {
 
     public void onLoginFailure(String errorMessage) {
         Gdx.app.log("SplashScreen", "Fallo en el login: " + errorMessage);
-        // Aquí podrías mostrar un mensaje de error al usuario
-        // Por ejemplo, usando una UI de LibGDX (Scene2D) para mostrar un mensaje
+        game.getOverlayManager().hideOverlay(loginOverlay);
+        final Group overlayGroup = game.getOverlayManager().showOverlay(stage);
+
+        Label message = new Label("Se ha producido un error y no se ha podido procesar la solicitud.", game.getSkin(), "error_message");
+        message.setWrap(true);
+        message.setWidth(stage.getWidth() * 0.8f);
+        message.setAlignment(Align.center);
+        message.setPosition((stage.getWidth() - message.getWidth()) / 2, stage.getHeight() / 2);
+        overlayGroup.addActor(message);
+
+        overlayGroup.setTouchable(Touchable.enabled);
+        overlayGroup.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.getOverlayManager().hideOverlay(overlayGroup);
+            }
+        });
+    }
+
+    @Override
+    public void show() {
+        game.getMusicManager().playMusic("main_menu");
     }
 
     @Override
@@ -167,21 +171,23 @@ public class SplashScreen implements Screen {
         stage.draw();
     }
 
-    @Override public void resize(int width, int height) { stage.getViewport().update(width, height, true); }
+    @Override
+    public void resize(int width, int height) {
+        stage.getViewport().update(width, height, true);
+    }
 
-    @Override public void pause() {}
+    @Override
+    public void pause() {}
 
-    @Override public void resume() {}
+    @Override
+    public void resume() {}
 
-    @Override public void show() {}
-
-    @Override public void hide() {}
+    @Override
+    public void hide() {}
 
     @Override
     public void dispose() {
-        if (mainMenuMusic != null) mainMenuMusic.stop();
         batch.dispose();
         stage.dispose();
-        if (skin != null) skin.dispose();
     }
 }

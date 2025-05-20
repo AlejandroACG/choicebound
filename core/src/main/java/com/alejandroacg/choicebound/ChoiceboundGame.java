@@ -5,6 +5,7 @@ import com.alejandroacg.choicebound.resources.ResourceManager;
 import com.alejandroacg.choicebound.screens.SplashScreen;
 import com.alejandroacg.choicebound.ui.OverlayManager;
 import com.alejandroacg.choicebound.utils.GameConfig;
+import com.alejandroacg.choicebound.utils.MusicManager;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -15,6 +16,10 @@ public class ChoiceboundGame extends Game {
     private ResourceManager resourceManager;
     private Skin skin;
     private OverlayManager overlayManager;
+    private MusicManager musicManager;
+    private Screen currentScreen;
+    private Screen lastScreen;
+    private boolean hasRenderedFirstFrame; // Para saber si la nueva pantalla ha renderizado
 
     public ChoiceboundGame(PlatformBridge platformBridge) {
         this.platformBridge = platformBridge;
@@ -28,25 +33,70 @@ public class ChoiceboundGame extends Game {
     public void create() {
         resourceManager = new ResourceManager();
         resourceManager.loadSplashAssets();
-        while (!resourceManager.update()) {}
+        resourceManager.finishLoading();
         skin = new Skin(Gdx.files.internal("ui/skin.json"));
         overlayManager = new OverlayManager(skin);
+        musicManager = new MusicManager(resourceManager);
         GameConfig.initialize();
         setScreen(new SplashScreen(this, resourceManager));
     }
 
     @Override
+    public void setScreen(Screen screen) {
+        if (currentScreen != null) {
+            lastScreen = currentScreen;
+            currentScreen.hide();
+        }
+        currentScreen = screen;
+        hasRenderedFirstFrame = false; // Resetear para la nueva pantalla
+        super.setScreen(screen);
+    }
+
+    @Override
+    public void render() {
+        // Si hay una pantalla anterior y la nueva ya ha renderizado su primer frame, liberamos la anterior
+        if (lastScreen != null && hasRenderedFirstFrame) {
+            lastScreen.dispose();
+            lastScreen = null;
+        }
+
+        // Renderizar la pantalla actual
+        super.render();
+
+        // Marcar que la pantalla actual ha renderizado su primer frame
+        hasRenderedFirstFrame = true;
+    }
+
+    @Override
     public void dispose() {
+        if (currentScreen != null) {
+            currentScreen.hide();
+            currentScreen.dispose();
+            currentScreen = null;
+        }
+        if (lastScreen != null) {
+            lastScreen.dispose();
+            lastScreen = null;
+        }
         super.dispose();
         resourceManager.dispose();
         skin.dispose();
+        musicManager.dispose();
     }
 
     public Screen getCurrentScreen() {
-        return getScreen();
+        return currentScreen;
     }
 
     public OverlayManager getOverlayManager() {
         return overlayManager;
+    }
+
+    public Skin getSkin() {
+        return skin;
+    }
+
+    public MusicManager getMusicManager() {
+        return musicManager;
     }
 }

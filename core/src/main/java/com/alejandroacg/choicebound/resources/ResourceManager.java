@@ -14,7 +14,6 @@ public class ResourceManager {
     // Carga los assets necesarios para el splash
     public void loadSplashAssets() {
         manager.load("textures/intro.atlas", TextureAtlas.class);
-        manager.load("sounds/main_menu.mp3", Music.class);
     }
 
     // Carga los assets necesarios para el resto del juego
@@ -24,6 +23,11 @@ public class ResourceManager {
     // Verifica si los assets están cargados
     public boolean update() {
         return manager.update();
+    }
+
+    // Finaliza la carga de todos los assets en cola de manera síncrona
+    public void finishLoading() {
+        manager.finishLoading();
     }
 
     // Obtiene el progreso de carga (de 0 a 1)
@@ -36,8 +40,14 @@ public class ResourceManager {
         return manager.get("textures/intro.atlas", TextureAtlas.class);
     }
 
-    public Music getMainMenuMusic() {
-        return manager.get("sounds/main_menu.mp3", Music.class);
+    public Music getMusic(String musicName) {
+        String path = "sounds/" + musicName + ".mp3";
+        // Si el archivo no está cargado, lo cargamos
+        if (!manager.isLoaded(path)) {
+            manager.load(path, Music.class);
+            manager.finishLoadingAsset(path);
+        }
+        return manager.get(path, Music.class);
     }
 
     public void dispose() {
