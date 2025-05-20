@@ -18,6 +18,7 @@ public class ResourceManager {
 
     // Carga los assets necesarios para el resto del juego
     public void loadGameAssets() {
+        manager.load("textures/ui.atlas", TextureAtlas.class);
     }
 
     // Verifica si los assets están cargados
@@ -35,9 +36,9 @@ public class ResourceManager {
         return manager.getProgress();
     }
 
-    // Acceso a los assets cargados
-    public TextureAtlas getIntroAtlas() {
-        return manager.get("textures/intro.atlas", TextureAtlas.class);
+    // Acceso a los atlas cargados
+    public TextureAtlas getAtlas(String atlasName) {
+        return manager.get("textures/" + atlasName + ".atlas", TextureAtlas.class);
     }
 
     public Music getMusic(String musicName) {

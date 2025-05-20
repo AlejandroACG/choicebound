@@ -8,7 +8,8 @@
   "com.badlogic.gdx.graphics.Color": {
     "black": { "r": 0, "g": 0, "b": 0, "a": 1 },
     "white": { "r": 1, "g": 1, "b": 1, "a": 1 },
-    "black_semi_transparent": { "r": 0, "g": 0, "b": 0, "a": 0.75 }
+    "black_semi_transparent": { "r": 0, "g": 0, "b": 0, "a": 0.75 },
+    "parchment_light": { "r": 0.96, "g": 0.88, "b": 0.71, "a": 1 }
   },
   "com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle": {
     "google": {
@@ -27,9 +28,10 @@
       "font": "alegreya",
       "fontColor": "black"
     },
-    "error_message": {
+    "overlay_message": {
       "font": "roboto",
       "fontColor": "white"
     }
   }
 }
+

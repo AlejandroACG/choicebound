@@ -9,13 +9,13 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.alejandroacg.choicebound.ChoiceboundGame;
 import com.alejandroacg.choicebound.resources.ResourceManager;
 import com.alejandroacg.choicebound.ui.ButtonHandler;
 import com.alejandroacg.choicebound.utils.ConnectivityChecker;
+import com.alejandroacg.choicebound.utils.GameConfig;
 
 import java.util.ArrayList;
 
@@ -50,7 +50,7 @@ public class SplashScreen implements Screen {
         int frameIndex = 0;
         while (true) {
             String frameName = "frame" + frameIndex;
-            TextureRegion frame = assetLoader.getIntroAtlas().findRegion(frameName);
+            TextureRegion frame = assetLoader.getAtlas("intro").findRegion(frameName);
             if (frame == null) break;
             frameList.add(frame);
             frameIndex++;
@@ -69,7 +69,7 @@ public class SplashScreen implements Screen {
         assetLoader.loadGameAssets();
 
         Gdx.input.setInputProcessor(stage);
-        this.connectivityChecker = new ConnectivityChecker(game.getPlatformBridge(), game.getSkin(), game.getOverlayManager());
+        this.connectivityChecker = new ConnectivityChecker(game.getPlatformBridge(), game.getOverlayManager());
         this.buttonHandler = new ButtonHandler(resourceManager, game.getSkin());
     }
 
@@ -96,28 +96,14 @@ public class SplashScreen implements Screen {
 
     public void onLoginSuccess() {
         Gdx.app.log("SplashScreen", "Login exitoso, cambiando a la pantalla principal");
-        game.setScreen(new HomeScreen(game));
+        // Encolar el cambio de pantalla en el hilo principal
+        Gdx.app.postRunnable(() -> game.setScreen(new HomeScreen(game)));
     }
 
     public void onLoginFailure(String errorMessage) {
         Gdx.app.log("SplashScreen", "Fallo en el login: " + errorMessage);
         game.getOverlayManager().hideOverlay(loginOverlay);
-        final Group overlayGroup = game.getOverlayManager().showOverlay(stage);
-
-        Label message = new Label("Se ha producido un error y no se ha podido procesar la solicitud.", game.getSkin(), "error_message");
-        message.setWrap(true);
-        message.setWidth(stage.getWidth() * 0.8f);
-        message.setAlignment(Align.center);
-        message.setPosition((stage.getWidth() - message.getWidth()) / 2, stage.getHeight() / 2);
-        overlayGroup.addActor(message);
-
-        overlayGroup.setTouchable(Touchable.enabled);
-        overlayGroup.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                game.getOverlayManager().hideOverlay(overlayGroup);
-            }
-        });
+        game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("error_message"));
     }
 
     @Override
