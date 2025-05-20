@@ -45,6 +45,7 @@ public class ButtonHandler {
         buttonStyle.fontColor = labelStyle.fontColor;
         buttonStyle.up = new TextureRegionDrawable(resourceManager.getAtlas("ui").findRegion("button_parchment"));
         buttonStyle.down = new TextureRegionDrawable(resourceManager.getAtlas("ui").findRegion("button_parchment_pressed"));
+        buttonStyle.disabled = new TextureRegionDrawable(resourceManager.getAtlas("ui").findRegion("button_parchment_disabled"));
         buttonStyle.pressedOffsetX = 1;
         buttonStyle.pressedOffsetY = -1;
 

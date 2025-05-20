@@ -19,7 +19,7 @@ public class ChoiceboundGame extends Game {
     private MusicManager musicManager;
     private Screen currentScreen;
     private Screen lastScreen;
-    private boolean hasRenderedFirstFrame; // Para saber si la nueva pantalla ha renderizado
+    private boolean hasRenderedFirstFrame;
     private UserInfo userInfo;
 
     public ChoiceboundGame(PlatformBridge platformBridge) {
@@ -40,6 +40,12 @@ public class ChoiceboundGame extends Game {
         overlayManager = new OverlayManager(skin);
         musicManager = new MusicManager(resourceManager);
         GameConfig.initialize();
+
+        // Actualizar UserInfo si el usuario ya está autenticado
+        if (platformBridge.isUserAuthenticated()) {
+            platformBridge.updateUserInfo();
+        }
+
         setScreen(new SplashScreen(this));
     }
 
@@ -50,22 +56,17 @@ public class ChoiceboundGame extends Game {
             currentScreen.hide();
         }
         currentScreen = screen;
-        hasRenderedFirstFrame = false; // Resetear para la nueva pantalla
+        hasRenderedFirstFrame = false;
         super.setScreen(screen);
     }
 
     @Override
     public void render() {
-        // Si hay una pantalla anterior y la nueva ya ha renderizado su primer frame, liberamos la anterior
         if (lastScreen != null && hasRenderedFirstFrame) {
             lastScreen.dispose();
             lastScreen = null;
         }
-
-        // Renderizar la pantalla actual
         super.render();
-
-        // Marcar que la pantalla actual ha renderizado su primer frame
         hasRenderedFirstFrame = true;
     }
 

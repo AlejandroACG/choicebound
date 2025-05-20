@@ -99,16 +99,19 @@ public class AuthManager {
                 if (task.isSuccessful()) {
                     FirebaseUser user = mAuth.getCurrentUser();
                     Log.d("AndroidLauncher", "Login exitoso: " + user.getDisplayName());
-                    // Almacenar displayName y uid en ChoiceboundGame
-                    String displayName = user.getDisplayName() != null ? user.getDisplayName() : "";
-                    String uid = user.getUid() != null ? user.getUid() : "";
-                    game.setUserInfo(displayName, uid);
+                    setUserInfoFromFirebaseUser(user);
                     notifyLoginSuccess();
                 } else {
                     Log.w("AndroidLauncher", "Fallo en login con Firebase: " + task.getException().getMessage());
                     notifyLoginFailure(task.getException().getMessage());
                 }
             });
+    }
+
+    private void setUserInfoFromFirebaseUser(FirebaseUser user) {
+        String displayName = user.getDisplayName() != null ? user.getDisplayName() : "";
+        String uid = user.getUid();
+        game.setUserInfo(displayName, uid);
     }
 
     private void notifyLoginSuccess() {
@@ -130,5 +133,12 @@ public class AuthManager {
     public void signOut() {
         mAuth.signOut();
         game.clearUserInfo();
+    }
+
+    public void updateUserInfo() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null) {
+            setUserInfoFromFirebaseUser(user);
+        }
     }
 }

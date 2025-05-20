@@ -1,5 +1,6 @@
 package com.alejandroacg.choicebound.screens;
 
+import com.alejandroacg.choicebound.ui.OverlayManager;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
@@ -31,7 +32,7 @@ public class SplashScreen implements Screen {
     private Container<Table> buttonContainer;
     private ConnectivityChecker connectivityChecker;
     private ButtonHandler buttonHandler;
-    private Group loginOverlay;
+    private Group currentOverlay;
 
     public SplashScreen(ChoiceboundGame game) {
         this.game = game;
@@ -80,7 +81,7 @@ public class SplashScreen implements Screen {
             public void changed(ChangeEvent event, Actor actor) {
                 Gdx.app.log("SplashScreen", "Botón pulsado, iniciando One Tap Sign-In");
                 if (connectivityChecker.checkConnectivity(stage)) {
-                    loginOverlay = game.getOverlayManager().showOverlay(stage);
+                    currentOverlay = game.getOverlayManager().showOverlay(stage);
                     game.getPlatformBridge().startOneTapSignIn();
                 }
             }
@@ -101,7 +102,7 @@ public class SplashScreen implements Screen {
 
     public void onLoginFailure(String errorMessage) {
         Gdx.app.log("SplashScreen", "Fallo en el login: " + errorMessage);
-        game.getOverlayManager().hideOverlay(loginOverlay);
+        game.getOverlayManager().hideOverlay(currentOverlay);
         game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("error_message"));
     }
 
@@ -133,13 +134,14 @@ public class SplashScreen implements Screen {
                 isAnimationFinished = true;
                 lastFrame = introAnimation.getKeyFrame(introAnimation.getAnimationDuration());
 
-                // Verificar si el usuario ya está autenticado
-                if (game.getPlatformBridge().isUserAuthenticated()) {
-                    // Si ya está autenticado, cambiar a HomeScreen
+                currentOverlay = game.getOverlayManager().showOverlay(stage);
+                createGoogleButton();
+                // Verificar conectividad antes de autenticación
+                if (connectivityChecker.checkConnectivity(stage) && game.getPlatformBridge().isUserAuthenticated()) {
+                    // Si hay conexión y el usuario está autenticado, cambiar a HomeScreen
                     Gdx.app.postRunnable(() -> game.setScreen(new HomeScreen(game)));
                 } else {
-                    // Si no está autenticado, mostrar el botón de Google
-                    createGoogleButton();
+                    game.getOverlayManager().hideOverlay(currentOverlay);
                 }
             }
 

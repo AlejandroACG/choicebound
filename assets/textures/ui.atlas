@@ -1,11 +1,13 @@
 ui.png
-size:1024,128
+size:2048,128
 repeat:none
 button_parchment
+bounds:748,37,160,85
+button_parchment_disabled
 bounds:586,37,160,85
 button_parchment_pressed
-bounds:748,37,160,85
+bounds:910,37,160,85
 container_parchment
 bounds:2,2,582,120
 home
-bounds:910,64,56,58
+bounds:1072,64,56,58

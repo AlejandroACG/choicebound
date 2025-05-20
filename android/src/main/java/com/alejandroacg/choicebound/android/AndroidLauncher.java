@@ -40,6 +40,11 @@ public class AndroidLauncher extends AndroidApplication implements PlatformBridg
     }
 
     @Override
+    public void updateUserInfo() {
+        authManager.updateUserInfo();
+    }
+
+    @Override
     public void onBackPressed() {
         // No hacer nada para deshabilitar el botón de retroceder
     }

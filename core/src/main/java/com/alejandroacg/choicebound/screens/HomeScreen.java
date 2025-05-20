@@ -37,17 +37,33 @@ public class HomeScreen implements Screen {
         mainTable.setFillParent(true);
         stage.addActor(mainTable);
 
+        // Título "Choicebound"
         String titleText = GameConfig.getString("title_choicebound");
-        String userName = game.getUserInfo().getDisplayName();
-        if (!userName.isEmpty()) {
-            titleText += " - " + userName;
-        }
         Label titleLabel = new Label(titleText, game.getSkin(), "roleplay_title");
         titleLabel.setFontScale(2.0f);
-        mainTable.add(titleLabel).expandX().center().padTop(20).padBottom(40).row();
+        mainTable.add(titleLabel).expandX().center().padTop(20).padBottom(10).row();
 
+        // Mensaje de bienvenida "Welcome, [nombre de usuario]"
+        String welcomeText = GameConfig.getString("welcome_message") + ", " + game.getUserInfo().getDisplayName();;
+        Label welcomeLabel = new Label(welcomeText, game.getSkin(), "roleplay_narrative_grey");
+        welcomeLabel.setFontScale(1.5f);
+        mainTable.add(welcomeLabel).expandX().center().padBottom(20).row();
+
+        // Botón "Store"
+        TextButton storeButton = buttonHandler.createDefaultButton(GameConfig.getString("store_button"));
+        storeButton.setDisabled(true);
+        storeButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                Gdx.app.log("HomeScreen", "Botón Shop pulsado");
+            }
+        });
+        mainTable.add(storeButton).width(storeButton.getWidth()).height(storeButton.getHeight()).padBottom(50).row();
+
+        // Área central para las diferentes campañas
         mainTable.add().expand().row();
 
+        // Botón de Sign Out en la parte inferior
         TextButton signOutButton = buttonHandler.createDefaultButton(GameConfig.getString("sign_out"));
         signOutButton.addListener(new ChangeListener() {
             @Override
