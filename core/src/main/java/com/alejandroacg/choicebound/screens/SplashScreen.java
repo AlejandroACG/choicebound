@@ -130,7 +130,15 @@ public class SplashScreen implements Screen {
             if (animationTime >= introAnimation.getAnimationDuration()) {
                 isAnimationFinished = true;
                 lastFrame = introAnimation.getKeyFrame(introAnimation.getAnimationDuration());
-                createGoogleButton();
+
+                // Verificar si el usuario ya está autenticado
+                if (game.getPlatformBridge().isUserAuthenticated()) {
+                    // Si ya está autenticado, cambiar a HomeScreen
+                    Gdx.app.postRunnable(() -> game.setScreen(new HomeScreen(game)));
+                } else {
+                    // Si no está autenticado, mostrar el botón de Google
+                    createGoogleButton();
+                }
             }
 
             float alpha = Math.min(1f, animationTime / 2f);

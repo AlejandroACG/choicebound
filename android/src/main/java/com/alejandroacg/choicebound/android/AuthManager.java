@@ -36,7 +36,6 @@ public class AuthManager {
         // Inicializa CredentialManager y Executor
         credentialManager = CredentialManager.create(activity);
         executor = Executors.newSingleThreadExecutor();
-
     }
 
     public boolean hasInternetConnection() {
@@ -125,5 +124,13 @@ public class AuthManager {
         if (game.getCurrentScreen() instanceof SplashScreen) {
             ((SplashScreen) game.getCurrentScreen()).onLoginFailure(errorMessage);
         }
+    }
+
+    public boolean isUserAuthenticated() {
+        return mAuth.getCurrentUser() != null;
+    }
+
+    public void signOut() {
+        mAuth.signOut();
     }
 }

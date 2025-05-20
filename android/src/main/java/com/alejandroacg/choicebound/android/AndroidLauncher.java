@@ -30,6 +30,16 @@ public class AndroidLauncher extends AndroidApplication implements PlatformBridg
     }
 
     @Override
+    public boolean isUserAuthenticated() {
+        return authManager.isUserAuthenticated();
+    }
+
+    @Override
+    public void signOut() {
+        authManager.signOut();
+    }
+
+    @Override
     public void onBackPressed() {
         // No hacer nada para deshabilitar el botón de retroceder
     }
