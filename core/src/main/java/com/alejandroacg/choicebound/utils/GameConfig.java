@@ -1,4 +1,4 @@
-package com.alejandroacg.choicebound;
+package com.alejandroacg.choicebound.utils;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.I18NBundle;

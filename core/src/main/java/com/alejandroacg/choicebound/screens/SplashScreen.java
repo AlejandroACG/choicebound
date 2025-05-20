@@ -1,5 +1,9 @@
-package com.alejandroacg.choicebound;
+package com.alejandroacg.choicebound.screens;
 
+import com.alejandroacg.choicebound.ui.ButtonHandler;
+import com.alejandroacg.choicebound.ChoiceboundGame;
+import com.alejandroacg.choicebound.utils.ConnectivityChecker;
+import com.alejandroacg.choicebound.resources.ResourceManager;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
@@ -77,7 +81,7 @@ public class SplashScreen implements Screen {
 
         Gdx.input.setInputProcessor(stage);
         skin = new Skin(Gdx.files.internal("ui/skin.json"));
-        this.connectivityChecker = new ConnectivityChecker(game.getPlatformBridge(), skin);
+        this.connectivityChecker = new ConnectivityChecker(game.getPlatformBridge(), skin, game.getOverlayManager());
         this.buttonHandler = new ButtonHandler(resourceManager, skin);
     }
 

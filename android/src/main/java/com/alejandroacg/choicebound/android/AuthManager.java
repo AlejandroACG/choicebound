@@ -12,7 +12,7 @@ import androidx.credentials.GetCredentialResponse;
 import androidx.credentials.exceptions.GetCredentialException;
 import com.alejandroacg.choicebound.ChoiceboundGame;
 import com.alejandroacg.choicebound.R;
-import com.alejandroacg.choicebound.SplashScreen;
+import com.alejandroacg.choicebound.screens.SplashScreen;
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
 import com.google.firebase.auth.*;

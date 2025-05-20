@@ -1,4 +1,4 @@
-package com.alejandroacg.choicebound;
+package com.alejandroacg.choicebound.resources;
 
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;

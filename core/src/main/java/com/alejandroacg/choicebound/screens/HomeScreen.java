@@ -1,5 +1,6 @@
-package com.alejandroacg.choicebound;
+package com.alejandroacg.choicebound.screens;
 
+import com.alejandroacg.choicebound.ChoiceboundGame;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;

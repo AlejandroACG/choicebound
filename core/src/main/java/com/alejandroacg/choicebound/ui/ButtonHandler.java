@@ -1,5 +1,7 @@
-package com.alejandroacg.choicebound;
+package com.alejandroacg.choicebound.ui;
 
+import com.alejandroacg.choicebound.utils.GameConfig;
+import com.alejandroacg.choicebound.resources.ResourceManager;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
