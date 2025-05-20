@@ -29,11 +29,7 @@ public class AuthManager {
     public AuthManager(AndroidLauncher activity, ChoiceboundGame game) {
         this.activity = activity;
         this.game = game;
-
-        // Inicializa Firebase
         mAuth = FirebaseAuth.getInstance();
-
-        // Inicializa CredentialManager y Executor
         credentialManager = CredentialManager.create(activity);
         executor = Executors.newSingleThreadExecutor();
     }
@@ -54,23 +50,20 @@ public class AuthManager {
     }
 
     public void startOneTapSignIn() {
-        // Configura las opciones de Google Sign-In
         GetGoogleIdOption googleIdOption = new GetGoogleIdOption.Builder()
-            .setFilterByAuthorizedAccounts(false) // Permite seleccionar cualquier cuenta de Google
+            .setFilterByAuthorizedAccounts(false)
             .setServerClientId(activity.getString(R.string.default_web_client_id))
-            .setAutoSelectEnabled(true) // Habilita la selección automática si hay una sola cuenta
+            .setAutoSelectEnabled(true)
             .build();
 
-        // Crea la solicitud de credenciales
         GetCredentialRequest request = new GetCredentialRequest.Builder()
             .addCredentialOption(googleIdOption)
             .build();
 
-        // Inicia el flujo de One Tap Sign-In
         credentialManager.getCredentialAsync(
             activity,
             request,
-            null, // CancellationSignal, no lo usamos aquí
+            null,
             executor,
             new CredentialManagerCallback<GetCredentialResponse, GetCredentialException>() {
                 @Override
@@ -106,6 +99,10 @@ public class AuthManager {
                 if (task.isSuccessful()) {
                     FirebaseUser user = mAuth.getCurrentUser();
                     Log.d("AndroidLauncher", "Login exitoso: " + user.getDisplayName());
+                    // Almacenar displayName y uid en ChoiceboundGame
+                    String displayName = user.getDisplayName() != null ? user.getDisplayName() : "";
+                    String uid = user.getUid() != null ? user.getUid() : "";
+                    game.setUserInfo(displayName, uid);
                     notifyLoginSuccess();
                 } else {
                     Log.w("AndroidLauncher", "Fallo en login con Firebase: " + task.getException().getMessage());
@@ -132,5 +129,6 @@ public class AuthManager {
 
     public void signOut() {
         mAuth.signOut();
+        game.clearUserInfo();
     }
 }

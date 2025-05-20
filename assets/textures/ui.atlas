@@ -1,11 +1,11 @@
 ui.png
-size:1024,512
+size:1024,128
 repeat:none
 button_parchment
-bounds:2,2,320,332
+bounds:586,37,160,85
 button_parchment_pressed
-bounds:324,2,320,332
+bounds:748,37,160,85
 container_parchment
-bounds:2,336,582,120
+bounds:2,2,582,120
 home
-bounds:646,224,224,232
+bounds:910,64,56,58

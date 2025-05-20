@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 
 public class ButtonHandler {
     private final ResourceManager resourceManager;
@@ -26,9 +27,6 @@ public class ButtonHandler {
         buttonStyle.fontColor = labelStyle.fontColor;
         buttonStyle.up = new TextureRegionDrawable(resourceManager.getAtlas("intro").findRegion("google_button_up"));
         buttonStyle.down = new TextureRegionDrawable(resourceManager.getAtlas("intro").findRegion("google_button_down"));
-
-        // Escalar la fuente para que la letra sea más grande
-        buttonStyle.font.getData().setScale(1.5f);
 
         // Crear un TextButton con el estilo dinámico
         TextButton googleButton = new TextButton("     " + GameConfig.getString("sign_in_with_google"), buttonStyle);
@@ -53,8 +51,26 @@ public class ButtonHandler {
         // Crear un TextButton con el estilo dinámico
         TextButton button = new TextButton(text, buttonStyle);
 
-        // Forzar que el botón calcule su tamaño
-        button.pack();
+        // Definir tamaños mínimos y padding
+        float minWidth = 200f;  // Tamaño mínimo del botón en ancho
+        float minHeight = 50f;  // Tamaño mínimo del botón en alto
+        float paddingHorizontal = 20f;  // Espacio a los lados del texto
+        float paddingVertical = 10f;    // Espacio arriba y abajo del texto
+
+        // Obtener el tamaño preferido del texto (Label interno)
+        Label label = button.getLabel();
+        float textWidth = label.getPrefWidth();
+        float textHeight = label.getPrefHeight();
+
+        // Calcular el tamaño total del botón con padding
+        float buttonWidth = Math.max(minWidth, textWidth + paddingHorizontal * 2);  // Ancho con padding a ambos lados
+        float buttonHeight = Math.max(minHeight, textHeight + paddingVertical * 2); // Alto con padding vertical
+
+        // Establecer el tamaño del botón
+        button.setSize(buttonWidth, buttonHeight);
+
+        // Centrar el texto dentro del botón
+        label.setAlignment(Align.center);
 
         return button;
     }

@@ -20,9 +20,11 @@ public class ChoiceboundGame extends Game {
     private Screen currentScreen;
     private Screen lastScreen;
     private boolean hasRenderedFirstFrame; // Para saber si la nueva pantalla ha renderizado
+    private UserInfo userInfo;
 
     public ChoiceboundGame(PlatformBridge platformBridge) {
         this.platformBridge = platformBridge;
+        this.userInfo = new UserInfo("", "");
     }
 
     public PlatformBridge getPlatformBridge() {
@@ -38,7 +40,7 @@ public class ChoiceboundGame extends Game {
         overlayManager = new OverlayManager(skin);
         musicManager = new MusicManager(resourceManager);
         GameConfig.initialize();
-        setScreen(new SplashScreen(this, resourceManager));
+        setScreen(new SplashScreen(this));
     }
 
     @Override
@@ -98,5 +100,21 @@ public class ChoiceboundGame extends Game {
 
     public MusicManager getMusicManager() {
         return musicManager;
+    }
+
+    public ResourceManager getResourceManager() {
+        return resourceManager;
+    }
+
+    public void setUserInfo(String displayName, String uid) {
+        this.userInfo = new UserInfo(displayName, uid);
+    }
+
+    public UserInfo getUserInfo() {
+        return userInfo;
+    }
+
+    public void clearUserInfo() {
+        this.userInfo = new UserInfo("", "");
     }
 }

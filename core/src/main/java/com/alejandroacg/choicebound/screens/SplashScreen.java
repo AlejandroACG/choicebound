@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.alejandroacg.choicebound.ChoiceboundGame;
 import com.alejandroacg.choicebound.resources.ResourceManager;
@@ -34,9 +33,9 @@ public class SplashScreen implements Screen {
     private ButtonHandler buttonHandler;
     private Group loginOverlay;
 
-    public SplashScreen(ChoiceboundGame game, ResourceManager assetLoader) {
+    public SplashScreen(ChoiceboundGame game) {
         this.game = game;
-        this.resourceManager = assetLoader;
+        this.resourceManager = game.getResourceManager();
         this.batch = new SpriteBatch();
         this.stage = new Stage(new ScreenViewport());
 
@@ -50,7 +49,7 @@ public class SplashScreen implements Screen {
         int frameIndex = 0;
         while (true) {
             String frameName = "frame" + frameIndex;
-            TextureRegion frame = assetLoader.getAtlas("intro").findRegion(frameName);
+            TextureRegion frame = resourceManager.getAtlas("intro").findRegion(frameName);
             if (frame == null) break;
             frameList.add(frame);
             frameIndex++;
@@ -66,11 +65,11 @@ public class SplashScreen implements Screen {
         introAnimation = new Animation<>(1f / 25f, frames);
         introAnimation.setPlayMode(Animation.PlayMode.NORMAL);
 
-        assetLoader.loadGameAssets();
+        resourceManager.loadGameAssets();
 
         Gdx.input.setInputProcessor(stage);
         this.connectivityChecker = new ConnectivityChecker(game.getPlatformBridge(), game.getOverlayManager());
-        this.buttonHandler = new ButtonHandler(resourceManager, game.getSkin());
+        this.buttonHandler = new ButtonHandler(game.getResourceManager(), game.getSkin());
     }
 
     private void createGoogleButton() {
@@ -108,6 +107,9 @@ public class SplashScreen implements Screen {
 
     @Override
     public void show() {
+        if (game.getMusicManager().isPlaying("main_menu")) {
+            game.getMusicManager().stopMusic();
+        }
         game.getMusicManager().playMusic("main_menu");
     }
 

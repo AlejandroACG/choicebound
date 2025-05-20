@@ -9,7 +9,9 @@
     "black": { "r": 0, "g": 0, "b": 0, "a": 1 },
     "white": { "r": 1, "g": 1, "b": 1, "a": 1 },
     "black_semi_transparent": { "r": 0, "g": 0, "b": 0, "a": 0.75 },
-    "parchment_light": { "r": 0.96, "g": 0.88, "b": 0.71, "a": 1 }
+    "parchment_light": { "r": 0.96, "g": 0.88, "b": 0.71, "a": 1 },
+    "grey": { "r": 0.5, "g": 0.5, "b": 0.5, "a": 1 },
+    "crimson": { "r": 0.86, "g": 0.08, "b": 0.24, "a": 1 }
   },
   "com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle": {
     "google": {
@@ -19,6 +21,13 @@
     "roleplay_narrative": {
       "font": "crimson_text",
       "fontColor": "black"
+    },"roleplay_narrative_grey": {
+      "font": "crimson_text",
+      "fontColor": "grey"
+    },
+    "roleplay_narrative_crimson": {
+      "font": "crimson_text",
+      "fontColor": "crimson"
     },
     "roleplay_button": {
       "font": "cinzel",
@@ -34,4 +43,3 @@
     }
   }
 }
-
