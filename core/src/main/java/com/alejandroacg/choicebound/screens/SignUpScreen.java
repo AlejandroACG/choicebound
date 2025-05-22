@@ -74,7 +74,11 @@ public class SignUpScreen implements Screen {
             @Override
             public boolean acceptChar(TextField textField, char c) {
                 // Permitir el carácter solo si la longitud actual del texto es menor que el máximo
-                return textField.getText().length() < MAX_USERNAME_LENGTH;
+                if (textField.getText().length() >= MAX_USERNAME_LENGTH) {
+                    return false;
+                }
+
+                return Character.isLetterOrDigit(c) || c == '-' || c == '_';
             }
         });
 

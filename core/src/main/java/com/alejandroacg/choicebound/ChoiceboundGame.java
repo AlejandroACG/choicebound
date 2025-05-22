@@ -51,7 +51,7 @@ public class ChoiceboundGame extends Game {
         resourceManager.loadSplashAssets();
         resourceManager.finishLoading();
         skin = new Skin(Gdx.files.internal("ui/skin.json"));
-        overlayManager = new OverlayManager(skin);
+        overlayManager = new OverlayManager(skin, this);
         musicManager = new MusicManager(resourceManager);
         GameConfig.initialize();
 
