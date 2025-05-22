@@ -1,5 +1,8 @@
 package com.alejandroacg.choicebound;
 
+import com.alejandroacg.choicebound.data.LocalUser;
+import com.alejandroacg.choicebound.data.UserDataManager;
+import com.alejandroacg.choicebound.interfaces.DatabaseInterface;
 import com.alejandroacg.choicebound.interfaces.PlatformBridge;
 import com.alejandroacg.choicebound.resources.ResourceManager;
 import com.alejandroacg.choicebound.screens.SplashScreen;
@@ -10,25 +13,36 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import lombok.Getter;
+import lombok.Setter;
 
 public class ChoiceboundGame extends Game {
+    @Getter
     private final PlatformBridge platformBridge;
+    @Getter
+    private final DatabaseInterface database;
+    @Getter
     private ResourceManager resourceManager;
+    @Getter
     private Skin skin;
+    @Getter
     private OverlayManager overlayManager;
+    @Getter
     private MusicManager musicManager;
+    @Getter
     private Screen currentScreen;
     private Screen lastScreen;
     private boolean hasRenderedFirstFrame;
-    private UserInfo userInfo;
+    @Getter @Setter
+    private LocalUser localUser;
+    @Getter
+    private final UserDataManager userDataManager;
 
-    public ChoiceboundGame(PlatformBridge platformBridge) {
+    public ChoiceboundGame(PlatformBridge platformBridge, DatabaseInterface database) {
         this.platformBridge = platformBridge;
-        this.userInfo = new UserInfo("", "");
-    }
-
-    public PlatformBridge getPlatformBridge() {
-        return platformBridge;
+        this.database = database;
+        this.localUser = new LocalUser();
+        this.userDataManager = new UserDataManager(this);
     }
 
     @Override
@@ -40,11 +54,6 @@ public class ChoiceboundGame extends Game {
         overlayManager = new OverlayManager(skin);
         musicManager = new MusicManager(resourceManager);
         GameConfig.initialize();
-
-        // Actualizar UserInfo si el usuario ya está autenticado
-        if (platformBridge.isUserAuthenticated()) {
-            platformBridge.updateUserInfo();
-        }
 
         setScreen(new SplashScreen(this));
     }
@@ -87,35 +96,12 @@ public class ChoiceboundGame extends Game {
         musicManager.dispose();
     }
 
-    public Screen getCurrentScreen() {
-        return currentScreen;
+    public void clearLocalUser() {
+        this.localUser = new LocalUser();
     }
 
-    public OverlayManager getOverlayManager() {
-        return overlayManager;
-    }
-
-    public Skin getSkin() {
-        return skin;
-    }
-
-    public MusicManager getMusicManager() {
-        return musicManager;
-    }
-
-    public ResourceManager getResourceManager() {
-        return resourceManager;
-    }
-
-    public void setUserInfo(String displayName, String uid) {
-        this.userInfo = new UserInfo(displayName, uid);
-    }
-
-    public UserInfo getUserInfo() {
-        return userInfo;
-    }
-
-    public void clearUserInfo() {
-        this.userInfo = new UserInfo("", "");
+    public void signOut() {
+        platformBridge.signOut();
+        Gdx.app.postRunnable(() -> setScreen(new SplashScreen(this)));
     }
 }

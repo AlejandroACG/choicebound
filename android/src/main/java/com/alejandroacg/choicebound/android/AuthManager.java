@@ -22,14 +22,14 @@ import java.util.concurrent.Executors;
 public class AuthManager {
     private final AndroidLauncher activity;
     private final ChoiceboundGame game;
-    private final FirebaseAuth mAuth;
+    private final FirebaseAuth firebaseAuth;
     private final CredentialManager credentialManager;
     private final Executor executor;
 
     public AuthManager(AndroidLauncher activity, ChoiceboundGame game) {
         this.activity = activity;
         this.game = game;
-        mAuth = FirebaseAuth.getInstance();
+        firebaseAuth = FirebaseAuth.getInstance();
         credentialManager = CredentialManager.create(activity);
         executor = Executors.newSingleThreadExecutor();
     }
@@ -74,7 +74,7 @@ public class AuthManager {
                 @Override
                 public void onError(GetCredentialException e) {
                     Log.w("AndroidLauncher", "Error en One Tap Sign-In: " + e.getMessage());
-                    notifyLoginFailure(e.getMessage());
+                    notifySignInFailure(e.getMessage());
                 }
             }
         );
@@ -88,57 +88,69 @@ public class AuthManager {
             firebaseAuthWithGoogle(credential);
         } catch (Exception e) {
             Log.w("AndroidLauncher", "Error al procesar la respuesta de One Tap Sign-In: " + e.getMessage());
-            notifyLoginFailure(e.getMessage());
+            notifySignInFailure(e.getMessage());
         }
     }
 
     private void firebaseAuthWithGoogle(GoogleIdTokenCredential credential) {
         AuthCredential authCredential = GoogleAuthProvider.getCredential(credential.getIdToken(), null);
-        mAuth.signInWithCredential(authCredential)
+        firebaseAuth.signInWithCredential(authCredential)
             .addOnCompleteListener(activity, task -> {
                 if (task.isSuccessful()) {
-                    FirebaseUser user = mAuth.getCurrentUser();
-                    Log.d("AndroidLauncher", "Login exitoso: " + user.getDisplayName());
-                    setUserInfoFromFirebaseUser(user);
-                    notifyLoginSuccess();
+                    FirebaseUser user = firebaseAuth.getCurrentUser();
+                    Log.d("AndroidLauncher", "SignIn exitoso: " + user.getDisplayName());
+                    String uid = user.getUid();
+                    // Usar la versión asíncrona de doesUserExist
+                    game.getDatabase().doesUserExist(
+                        uid,
+                        exists -> {
+                            if (exists) {
+                                notifySignInSuccess();
+                            } else {
+                                notifyFirstSignInSuccess();
+                            }
+                        },
+                        error -> {
+                            Log.w("AndroidLauncher", "Error al verificar existencia de usuario: " + error);
+                            notifySignInFailure(error);
+                        }
+                    );
                 } else {
-                    Log.w("AndroidLauncher", "Fallo en login con Firebase: " + task.getException().getMessage());
-                    notifyLoginFailure(task.getException().getMessage());
+                    Log.w("AndroidLauncher", "Fallo en SignIn con Firebase: " + task.getException().getMessage());
+                    notifySignInFailure(task.getException().getMessage());
                 }
             });
     }
 
-    private void setUserInfoFromFirebaseUser(FirebaseUser user) {
-        String displayName = user.getDisplayName() != null ? user.getDisplayName() : "";
-        String uid = user.getUid();
-        game.setUserInfo(displayName, uid);
-    }
-
-    private void notifyLoginSuccess() {
+    private void notifySignInSuccess() {
         if (game.getCurrentScreen() instanceof SplashScreen) {
-            ((SplashScreen) game.getCurrentScreen()).onLoginSuccess();
+            ((SplashScreen) game.getCurrentScreen()).onSignInSuccess();
         }
     }
 
-    private void notifyLoginFailure(String errorMessage) {
+    private void notifyFirstSignInSuccess() {
         if (game.getCurrentScreen() instanceof SplashScreen) {
-            ((SplashScreen) game.getCurrentScreen()).onLoginFailure(errorMessage);
+            ((SplashScreen) game.getCurrentScreen()).onFirstSignInSuccess();
+        }
+    }
+
+    private void notifySignInFailure(String errorMessage) {
+        if (game.getCurrentScreen() instanceof SplashScreen) {
+            ((SplashScreen) game.getCurrentScreen()).onSignInFailure(errorMessage);
         }
     }
 
     public boolean isUserAuthenticated() {
-        return mAuth.getCurrentUser() != null;
+        return firebaseAuth.getCurrentUser() != null;
     }
 
     public void signOut() {
-        mAuth.signOut();
-        game.clearUserInfo();
+        firebaseAuth.signOut();
+        game.clearLocalUser();
     }
 
-    public void updateUserInfo() {
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user != null) {
-            setUserInfoFromFirebaseUser(user);
-        }
+    public String getCurrentUserUid() {
+        FirebaseUser user = firebaseAuth.getCurrentUser();
+        return user != null ? user.getUid() : null;
     }
 }

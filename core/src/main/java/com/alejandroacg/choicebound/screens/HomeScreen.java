@@ -11,7 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.alejandroacg.choicebound.ChoiceboundGame;
-import com.alejandroacg.choicebound.ui.ButtonHandler;
+import com.alejandroacg.choicebound.ui.UIElementFactory;
 import com.alejandroacg.choicebound.utils.GameConfig;
 import com.alejandroacg.choicebound.utils.MusicManager;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -19,13 +19,13 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 public class HomeScreen implements Screen {
     private final ChoiceboundGame game;
     private final Stage stage;
+    private final UIElementFactory uiElementFactory;
     private final Color backgroundColor;
-    private final ButtonHandler buttonHandler;
 
     public HomeScreen(ChoiceboundGame game) {
         this.game = game;
         this.stage = new Stage(new ScreenViewport());
-        this.buttonHandler = new ButtonHandler(game.getResourceManager(), game.getSkin());
+        this.uiElementFactory = new UIElementFactory(game.getResourceManager(), game.getSkin());
         Gdx.input.setInputProcessor(stage);
 
         this.backgroundColor = game.getSkin().getColor("parchment_light");
@@ -44,13 +44,13 @@ public class HomeScreen implements Screen {
         mainTable.add(titleLabel).expandX().center().padTop(20).padBottom(10).row();
 
         // Mensaje de bienvenida "Welcome, [nombre de usuario]"
-        String welcomeText = GameConfig.getString("welcome_message") + ", " + game.getUserInfo().getDisplayName();;
+        String welcomeText = GameConfig.getString("welcome_message") + ", " + game.getLocalUser().getUsername();;
         Label welcomeLabel = new Label(welcomeText, game.getSkin(), "roleplay_narrative_grey");
         welcomeLabel.setFontScale(1.5f);
         mainTable.add(welcomeLabel).expandX().center().padBottom(20).row();
 
         // Botón "Store"
-        TextButton storeButton = buttonHandler.createDefaultButton(GameConfig.getString("store_button"));
+        TextButton storeButton = uiElementFactory.createDefaultButton(GameConfig.getString("store_button"));
         storeButton.setDisabled(true);
         storeButton.addListener(new ChangeListener() {
             @Override
@@ -64,12 +64,11 @@ public class HomeScreen implements Screen {
         mainTable.add().expand().row();
 
         // Botón de Sign Out en la parte inferior
-        TextButton signOutButton = buttonHandler.createDefaultButton(GameConfig.getString("sign_out"));
+        TextButton signOutButton = uiElementFactory.createDefaultButton(GameConfig.getString("sign_out"));
         signOutButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.getPlatformBridge().signOut();
-                Gdx.app.postRunnable(() -> game.setScreen(new SplashScreen(game)));
+                game.signOut();
             }
         });
         mainTable.add(signOutButton).width(signOutButton.getWidth()).height(signOutButton.getHeight()).padBottom(20);

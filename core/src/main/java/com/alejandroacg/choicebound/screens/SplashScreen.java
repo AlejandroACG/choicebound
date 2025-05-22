@@ -1,6 +1,5 @@
 package com.alejandroacg.choicebound.screens;
 
-import com.alejandroacg.choicebound.ui.OverlayManager;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
@@ -13,10 +12,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.alejandroacg.choicebound.ChoiceboundGame;
 import com.alejandroacg.choicebound.resources.ResourceManager;
-import com.alejandroacg.choicebound.ui.ButtonHandler;
+import com.alejandroacg.choicebound.ui.UIElementFactory;
 import com.alejandroacg.choicebound.utils.ConnectivityChecker;
 import com.alejandroacg.choicebound.utils.GameConfig;
-
 import java.util.ArrayList;
 
 public class SplashScreen implements Screen {
@@ -31,7 +29,7 @@ public class SplashScreen implements Screen {
     private TextureRegion lastFrame;
     private Container<Table> buttonContainer;
     private ConnectivityChecker connectivityChecker;
-    private ButtonHandler buttonHandler;
+    private UIElementFactory uiElementFactory;
     private Group currentOverlay;
 
     public SplashScreen(ChoiceboundGame game) {
@@ -39,6 +37,8 @@ public class SplashScreen implements Screen {
         this.resourceManager = game.getResourceManager();
         this.batch = new SpriteBatch();
         this.stage = new Stage(new ScreenViewport());
+
+        game.clearLocalUser();
 
         animationTime = 0f;
         delayTime = 0f;
@@ -70,11 +70,11 @@ public class SplashScreen implements Screen {
 
         Gdx.input.setInputProcessor(stage);
         this.connectivityChecker = new ConnectivityChecker(game.getPlatformBridge(), game.getOverlayManager());
-        this.buttonHandler = new ButtonHandler(game.getResourceManager(), game.getSkin());
+        this.uiElementFactory = new UIElementFactory(game.getResourceManager(), game.getSkin());
     }
 
     private void createGoogleButton() {
-        TextButton googleButton = buttonHandler.createGoogleButton();
+        TextButton googleButton = uiElementFactory.createGoogleButton();
 
         googleButton.addListener(new ChangeListener() {
             @Override
@@ -94,14 +94,32 @@ public class SplashScreen implements Screen {
         stage.addActor(buttonContainer);
     }
 
-    public void onLoginSuccess() {
-        Gdx.app.log("SplashScreen", "Login exitoso, cambiando a la pantalla principal");
-        // Encolar el cambio de pantalla en el hilo principal
-        Gdx.app.postRunnable(() -> game.setScreen(new HomeScreen(game)));
+    public void onSignInSuccess() {
+        Gdx.app.log("SplashScreen", "Sign In exitoso, cargando datos del usuario");
+        game.getUserDataManager().loadUserDataFromFirestore(
+            () -> {
+                // Éxito: datos cargados, ahora redirigir a HomeScreen
+                Gdx.app.log("SplashScreen", "Datos cargados, cambiando a la pantalla principal");
+                Gdx.app.postRunnable(() -> game.setScreen(new HomeScreen(game)));
+            },
+            error -> {
+                // Error al cargar datos, ejecutar signOut
+                Gdx.app.log("SplashScreen", "Error al cargar datos del usuario: " + error);
+                game.getPlatformBridge().signOut();
+                game.getOverlayManager().hideOverlay(currentOverlay);
+            }
+        );
     }
 
-    public void onLoginFailure(String errorMessage) {
-        Gdx.app.log("SplashScreen", "Fallo en el login: " + errorMessage);
+    public void onFirstSignInSuccess() {
+        Gdx.app.log("SplashScreen", "First Sign In exitoso, cambiando a la pantalla de registro");
+        game.getLocalUser().setUid(game.getPlatformBridge().getCurrentUserId());
+        // Encolar el cambio de pantalla en el hilo principal
+        Gdx.app.postRunnable(() -> game.setScreen(new SignUpScreen(game)));
+    }
+
+    public void onSignInFailure(String errorMessage) {
+        Gdx.app.log("SplashScreen", "Fallo en el sign in: " + errorMessage);
         game.getOverlayManager().hideOverlay(currentOverlay);
         game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("error_message"));
     }
@@ -134,13 +152,30 @@ public class SplashScreen implements Screen {
                 isAnimationFinished = true;
                 lastFrame = introAnimation.getKeyFrame(introAnimation.getAnimationDuration());
 
-                currentOverlay = game.getOverlayManager().showOverlay(stage);
                 createGoogleButton();
+                currentOverlay = game.getOverlayManager().showOverlay(stage);
+                String uid = game.getPlatformBridge().getCurrentUserId();
+
                 // Verificar conectividad antes de autenticación
-                if (connectivityChecker.checkConnectivity(stage) && game.getPlatformBridge().isUserAuthenticated()) {
-                    // Si hay conexión y el usuario está autenticado, cambiar a HomeScreen
-                    Gdx.app.postRunnable(() -> game.setScreen(new HomeScreen(game)));
+                if (connectivityChecker.checkConnectivity(stage) && game.getPlatformBridge().isUserAuthenticated() && uid != null) {
+                    game.getDatabase().doesUserExist(
+                        uid,
+                        exists -> {
+                            if (exists) {
+                                onSignInSuccess();
+                            } else {
+                                game.getPlatformBridge().signOut();
+                                game.getOverlayManager().hideOverlay(currentOverlay);
+                            }
+                        },
+                        error -> {
+                            Gdx.app.error("SplashScreen", "Error al verificar existencia de usuario: " + error);
+                            game.getPlatformBridge().signOut();
+                            game.getOverlayManager().hideOverlay(currentOverlay);
+                        }
+                    );
                 } else {
+                    game.getPlatformBridge().signOut();
                     game.getOverlayManager().hideOverlay(currentOverlay);
                 }
             }

@@ -5,5 +5,6 @@ public interface PlatformBridge {
     boolean hasInternetConnection();
     boolean isUserAuthenticated();
     void signOut();
-    void updateUserInfo();
+    String getCurrentUserId();
+    float getKeyboardHeight();
 }
