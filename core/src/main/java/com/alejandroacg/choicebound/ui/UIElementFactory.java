@@ -10,7 +10,9 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 
 public class UIElementFactory {
     private final ResourceManager resourceManager;
@@ -71,6 +73,12 @@ public class UIElementFactory {
 
         TextButton button = new TextButton(text, buttonStyle);
         button.getLabelCell().pad(25f);
+        button.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                resourceManager.getSound("ui_click").play();
+            }
+        });
         return button;
     }
 
@@ -117,5 +125,32 @@ public class UIElementFactory {
         cursorPixmap.dispose();
 
         return new TextField("", style);
+    }
+
+    public Table createHeader() {
+        Table headerTable = new Table();
+        float screenHeight = Gdx.graphics.getHeight();
+
+        Color headerColor = skin.getColor("brown_header");
+
+        // Fondo sólido marrón suave
+        headerTable.setBackground(createSolidColorDrawable(headerColor));
+
+        // Altura proporcional al alto de la pantalla (puedes ajustar el 0.2f)
+        headerTable.setHeight(screenHeight * 0.2f);
+        headerTable.top(); // Alinea contenido en la parte superior del header
+
+        return headerTable;
+    }
+
+    public TextureRegionDrawable createSolidColorDrawable(Color color) {
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(color);
+        pixmap.fill();
+
+        Texture texture = new Texture(pixmap);
+        pixmap.dispose();
+
+        return new TextureRegionDrawable(new TextureRegion(texture));
     }
 }

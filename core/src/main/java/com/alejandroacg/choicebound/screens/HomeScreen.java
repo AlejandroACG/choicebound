@@ -13,8 +13,10 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.alejandroacg.choicebound.ChoiceboundGame;
 import com.alejandroacg.choicebound.ui.UIElementFactory;
 import com.alejandroacg.choicebound.utils.GameConfig;
-import com.alejandroacg.choicebound.utils.MusicManager;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+
+import static com.alejandroacg.choicebound.utils.GameConfig.HEADER_HEIGHT_RATIO;
 
 public class HomeScreen implements Screen {
     private final ChoiceboundGame game;
@@ -35,30 +37,69 @@ public class HomeScreen implements Screen {
     private void setupUI() {
         Table mainTable = new Table();
         mainTable.setFillParent(true);
+        mainTable.top();
         stage.addActor(mainTable);
 
-        // Título "Choicebound"
-        String titleText = GameConfig.getString("title_choicebound");
-        Label titleLabel = new Label(titleText, game.getSkin(), "roleplay_title");
-        titleLabel.setFontScale(2.0f);
-        mainTable.add(titleLabel).expandX().center().padTop(20).padBottom(10).row();
+        float screenHeight = Gdx.graphics.getHeight();
+        float titleScale = 3f;
+        float subtitleScale = 2f;
 
-        // Mensaje de bienvenida "Welcome, [nombre de usuario]"
-        String welcomeText = GameConfig.getString("welcome_message") + ", " + game.getLocalUser().getUsername();;
-        Label welcomeLabel = new Label(welcomeText, game.getSkin(), "roleplay_narrative_grey");
-        welcomeLabel.setFontScale(1.5f);
-        mainTable.add(welcomeLabel).expandX().center().padBottom(20).row();
+        // Crear el header con fondo y altura fija
+        Table header = uiElementFactory.createHeader();
 
-        // Botón "Store"
+        // Crear y configurar los elementos del header
+        Label titleLabel = uiElementFactory.createTitleLabel(GameConfig.getString("title_choicebound"));
+        titleLabel.setFontScale(titleScale);
+        titleLabel.setAlignment(Align.center);
+
+        Label welcomeLabel = new Label(
+            GameConfig.getString("welcome_message") + ", " + game.getLocalUser().getUsername(),
+            game.getSkin(),
+            "roleplay_narrative_grey"
+        );
+        welcomeLabel.setFontScale(subtitleScale);
+        welcomeLabel.setAlignment(Align.center);
+
         TextButton storeButton = uiElementFactory.createDefaultButton(GameConfig.getString("store_button"));
         storeButton.setDisabled(true);
         storeButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                Gdx.app.log("HomeScreen", "Botón Shop pulsado");
+                Gdx.app.log("HomeScreen", "Botón Store pulsado");
             }
         });
-        mainTable.add(storeButton).width(storeButton.getWidth()).height(storeButton.getHeight()).padBottom(50).row();
+
+        TextButton settingsButton = uiElementFactory.createDefaultButton(GameConfig.getString("settings"));
+        settingsButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                Gdx.app.log("HomeScreen", "Botón Settings pulsado");
+                game.setScreen(new SettingsScreen(game));
+            }
+        });
+
+        // Subtabla horizontal para los botones
+        Table buttonsTable = new Table();
+        buttonsTable.add(storeButton).padRight(20);
+        buttonsTable.add(settingsButton);
+
+        // Subtabla para centrar verticalmente el contenido del header
+        Table headerContent = new Table();
+        headerContent.setFillParent(true);
+        headerContent.top().center();
+        headerContent.add(titleLabel).padTop(20).row();
+        headerContent.add(welcomeLabel).padTop(10).row();
+        headerContent.add(buttonsTable).padTop(10);
+
+        header.addActor(headerContent);
+
+        // Añadir el header al layout principal
+        mainTable.add(header)
+            .height(screenHeight * HEADER_HEIGHT_RATIO)
+            .width(Gdx.graphics.getWidth())
+            .expandX()
+            .fillX()
+            .row();
 
         // Área central para las diferentes campañas
         mainTable.add().expand().row();
@@ -71,15 +112,12 @@ public class HomeScreen implements Screen {
                 game.signOut();
             }
         });
-        mainTable.add(signOutButton).width(signOutButton.getWidth()).height(signOutButton.getHeight()).padBottom(20);
+        mainTable.add(signOutButton).padBottom(20);
     }
 
     @Override
     public void show() {
-        MusicManager musicManager = game.getMusicManager();
-        if (!musicManager.isPlaying("main_menu")) {
-            musicManager.playMusic("main_menu");
-        }
+        game.getMusicManager().playIfDifferent("main_menu");
     }
 
     @Override
@@ -108,9 +146,5 @@ public class HomeScreen implements Screen {
     @Override
     public void dispose() {
         stage.dispose();
-    }
-
-    public Stage getStage() {
-        return stage;
     }
 }

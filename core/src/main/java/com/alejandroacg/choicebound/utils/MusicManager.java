@@ -14,16 +14,30 @@ public class MusicManager {
         this.currentMusicName = null;
     }
 
-    public void playMusic(String musicName) {
-        // No reproducir si la música ya está sonando
-        if (isPlaying(musicName)) {
-            return;
+    // Siempre detiene lo que esté sonando y reproduce la nueva música
+    public void playExclusive(String musicName) {
+        stop();
+        playInternal(musicName);
+    }
+
+    // Solo cambia la música si la que se solicita es diferente
+    public void playIfDifferent(String musicName) {
+        if (!isPlaying(musicName)) {
+            stop();
+            playInternal(musicName);
         }
+    }
 
-        // Detener la música actual si está reproduciéndose
-        stopMusic();
+    // Detiene toda la música
+    public void stop() {
+        if (currentMusic != null) {
+            currentMusic.stop();
+            currentMusic = null;
+            currentMusicName = null;
+        }
+    }
 
-        // Cargar y reproducir la nueva música
+    private void playInternal(String musicName) {
         try {
             currentMusic = resourceManager.getMusic(musicName);
             if (currentMusic != null) {
@@ -40,15 +54,7 @@ public class MusicManager {
         return currentMusic != null && currentMusicName != null && currentMusicName.equals(musicName) && currentMusic.isPlaying();
     }
 
-    public void stopMusic() {
-        if (currentMusic != null) {
-            currentMusic.stop();
-            currentMusic = null;
-            currentMusicName = null;
-        }
-    }
-
     public void dispose() {
-        stopMusic();
+        stop();
     }
 }

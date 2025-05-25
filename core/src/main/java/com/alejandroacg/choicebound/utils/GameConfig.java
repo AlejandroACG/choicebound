@@ -8,6 +8,7 @@ import java.util.Locale;
 
 public class GameConfig {
     private static I18NBundle strings;
+    public static final float HEADER_HEIGHT_RATIO = 0.20f;
 
     public static void initialize() {
         I18NBundle.setSimpleFormatter(true);

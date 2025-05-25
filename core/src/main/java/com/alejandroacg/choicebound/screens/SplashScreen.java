@@ -100,6 +100,7 @@ public class SplashScreen implements Screen {
             () -> {
                 // Éxito: datos cargados, ahora redirigir a HomeScreen
                 Gdx.app.log("SplashScreen", "Datos cargados, cambiando a la pantalla principal");
+                game.getMusicManager().stop();
                 Gdx.app.postRunnable(() -> game.setScreen(new HomeScreen(game)));
             },
             error -> {
@@ -115,6 +116,7 @@ public class SplashScreen implements Screen {
         Gdx.app.log("SplashScreen", "First Sign In exitoso, cambiando a la pantalla de registro");
         game.getLocalUser().setUid(game.getPlatformBridge().getCurrentUserId());
         // Encolar el cambio de pantalla en el hilo principal
+        game.getMusicManager().stop();
         Gdx.app.postRunnable(() -> game.setScreen(new SignUpScreen(game)));
     }
 
@@ -126,10 +128,7 @@ public class SplashScreen implements Screen {
 
     @Override
     public void show() {
-        if (game.getMusicManager().isPlaying("main_menu")) {
-            game.getMusicManager().stopMusic();
-        }
-        game.getMusicManager().playMusic("main_menu");
+        game.getMusicManager().playExclusive("splash_screen");
     }
 
     @Override

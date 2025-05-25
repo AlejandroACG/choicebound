@@ -49,8 +49,8 @@ public class SignUpScreen implements Screen {
         float screenWidth = Gdx.graphics.getWidth();
         float screenHeight = Gdx.graphics.getHeight();
         float padTop = screenHeight * 0.25f; // 25% de la altura desde la parte superior (para centrar al 75%)
-        float titleScale = screenWidth > 1000 ? 4.0f : 2.0f;
-        float labelScale = screenWidth > 1000 ? 3.0f : 2.0f;
+        float titleScale = 3.0f;
+        float labelScale = 2.0f;
 
         // Añadir espacio superior para mover los elementos hacia abajo
         paddingTopCell = table.add().height(padTop);
@@ -130,10 +130,7 @@ public class SignUpScreen implements Screen {
 
     @Override
     public void show() {
-        if (game.getMusicManager().isPlaying("main_menu")) {
-            game.getMusicManager().stopMusic();
-        }
-        game.getMusicManager().playMusic("main_menu");
+        game.getMusicManager().playIfDifferent("main_menu");
     }
 
     @Override

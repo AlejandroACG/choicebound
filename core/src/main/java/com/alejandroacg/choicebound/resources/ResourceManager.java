@@ -2,6 +2,7 @@ package com.alejandroacg.choicebound.resources;
 
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 
 public class ResourceManager {
@@ -14,11 +15,14 @@ public class ResourceManager {
     // Carga los assets necesarios para el splash
     public void loadSplashAssets() {
         manager.load("textures/intro.atlas", TextureAtlas.class);
+        manager.load("music/splash_screen.mp3", Music.class);
     }
 
     // Carga los assets necesarios para el resto del juego
     public void loadGameAssets() {
         manager.load("textures/ui.atlas", TextureAtlas.class);
+        manager.load("music/main_menu.mp3", Music.class);
+        manager.load("sounds/ui_click.wav", Sound.class);
     }
 
     // Verifica si los assets están cargados
@@ -42,13 +46,22 @@ public class ResourceManager {
     }
 
     public Music getMusic(String musicName) {
-        String path = "sounds/" + musicName + ".mp3";
+        String path = "music/" + musicName + ".mp3";
         // Si el archivo no está cargado, lo cargamos
         if (!manager.isLoaded(path)) {
             manager.load(path, Music.class);
             manager.finishLoadingAsset(path);
         }
         return manager.get(path, Music.class);
+    }
+
+    public Sound getSound(String soundName) {
+        String path = "sounds/" + soundName + ".wav";
+        if (!manager.isLoaded(path)) {
+            manager.load(path, Sound.class);
+            manager.finishLoadingAsset(path);
+        }
+        return manager.get(path, Sound.class);
     }
 
     public void dispose() {
