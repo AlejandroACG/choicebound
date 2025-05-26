@@ -45,8 +45,8 @@ public class UIElementFactory {
 
         buttonStyle.font = fontCopy;
         buttonStyle.fontColor = labelStyle.fontColor;
-        buttonStyle.up = new TextureRegionDrawable(resourceManager.getAtlas("intro").findRegion("google_button_up"));
-        buttonStyle.down = new TextureRegionDrawable(resourceManager.getAtlas("intro").findRegion("google_button_down"));
+        buttonStyle.up = new TextureRegionDrawable(resourceManager.getAtlas("ui_pre_loaded").findRegion("google_button_up"));
+        buttonStyle.down = new TextureRegionDrawable(resourceManager.getAtlas("ui_pre_loaded").findRegion("google_button_down"));
 
         TextButton googleButton = new TextButton(GameConfig.getString("sign_in_with_google"), buttonStyle);
 

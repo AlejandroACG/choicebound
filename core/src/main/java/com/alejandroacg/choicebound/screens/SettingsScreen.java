@@ -96,7 +96,6 @@ public class SettingsScreen implements Screen {
                         @Override
                         public void onCancel() {
                             Gdx.app.log("SettingsScreen", "Eliminación cancelada.");
-                            // Nada más si no quieres overlay
                         }
                     }
                 );

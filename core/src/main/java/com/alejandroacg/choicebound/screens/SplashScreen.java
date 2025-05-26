@@ -13,7 +13,6 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.alejandroacg.choicebound.ChoiceboundGame;
 import com.alejandroacg.choicebound.resources.ResourceManager;
 import com.alejandroacg.choicebound.ui.UIElementFactory;
-import com.alejandroacg.choicebound.utils.ConnectivityChecker;
 import com.alejandroacg.choicebound.utils.GameConfig;
 import java.util.ArrayList;
 

@@ -1,0 +1,9 @@
+ui_pre_loaded.png
+size:2048,256
+repeat:none
+google_button_down
+bounds:704,43,700,160
+google_button_up
+bounds:2,43,700,160
+message_box_bg
+bounds:2,2,340,39

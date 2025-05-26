@@ -84,7 +84,7 @@ public class OverlayManager {
 
         // Crear imagen decorativa de fondo desde intro.atlas
         TextureRegionDrawable messageBgDrawable = new TextureRegionDrawable(
-            game.getResourceManager().getAtlas("intro").findRegion("message_box_bg"));
+            game.getResourceManager().getAtlas("ui_pre_loaded").findRegion("message_box_bg"));
 
         Image messageBg = new Image(messageBgDrawable);
         messageBg.setBounds(bgX, bgY, bgWidth, bgHeight);

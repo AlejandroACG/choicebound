@@ -15,6 +15,7 @@ public class ResourceManager {
     // Carga los assets necesarios para el splash
     public void loadSplashAssets() {
         manager.load("textures/intro.atlas", TextureAtlas.class);
+        manager.load("textures/ui_pre_loaded.atlas", TextureAtlas.class);
         manager.load("music/splash_screen.mp3", Music.class);
     }
 
