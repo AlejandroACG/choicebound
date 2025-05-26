@@ -10,12 +10,16 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.ui.Window.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
+import lombok.Getter;
 
 public class UIElementFactory {
+    @Getter
     private final ResourceManager resourceManager;
+    @Getter
     private final Skin skin;
     private final Texture backgroundTexture;
 
@@ -152,5 +156,88 @@ public class UIElementFactory {
         pixmap.dispose();
 
         return new TextureRegionDrawable(new TextureRegion(texture));
+    }
+
+    public Dialog createConfirmationDialog(String message, ConfirmationListener listener) {
+        // Crear estilo del diálogo
+        Label.LabelStyle labelStyle = skin.get("roleplay_title_bold", Label.LabelStyle.class);
+        BitmapFont fontCopy = new BitmapFont(labelStyle.font.getData(), labelStyle.font.getRegions(), labelStyle.font.usesIntegerPositions());
+        fontCopy.getData().setScale(1f);
+
+        TextureRegion backgroundRegion = resourceManager.getAtlas("ui").findRegion("container_parchment");
+
+        WindowStyle dialogStyle = new WindowStyle();
+        dialogStyle.titleFont = fontCopy;
+        dialogStyle.titleFontColor = labelStyle.fontColor;
+        dialogStyle.background = new TextureRegionDrawable(backgroundRegion);
+
+        // Crear el diálogo sin título
+        Dialog dialog = new Dialog("", dialogStyle) {
+            @Override
+            public float getPrefWidth() {
+                return Gdx.graphics.getWidth() * 0.75f;
+            }
+
+            @Override
+            public float getPrefHeight() {
+                return super.getPrefHeight();
+            }
+        };
+
+        dialog.setModal(true);
+        dialog.setMovable(false);
+        dialog.setResizable(false);
+
+        // Crear tabla interna para el contenido
+        Table content = new Table();
+        content.defaults().pad(5f); // Padding interno global
+
+        // Mensaje centrado con mayor escala y wrapping
+        Label messageLabel = createBoldTitleLabel(message);
+        messageLabel.setWrap(true);
+        messageLabel.setFontScale(1.5f);
+        messageLabel.setAlignment(Align.center);
+        float labelWidth = Gdx.graphics.getWidth() * 0.75f - 160f; // 80f padding a cada lado
+        content.add(messageLabel).width(labelWidth).center().row();
+
+        // Botones personalizados
+        TextButton yesButton = createDefaultButton(GameConfig.getString("yes"));
+        TextButton noButton = createDefaultButton(GameConfig.getString("no"));
+
+        yesButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                yesButton.setDisabled(true);
+                noButton.setDisabled(true);
+                dialog.hide();
+                listener.onConfirm();
+            }
+        });
+
+        noButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                yesButton.setDisabled(true);
+                noButton.setDisabled(true);
+                dialog.hide();
+                listener.onCancel();
+            }
+        });
+
+        // Subtabla para botones centrados y bien espaciados
+        Table buttonTable = new Table();
+        buttonTable.add(yesButton).pad(10f);
+        buttonTable.add(noButton).pad(10f);
+
+        content.add(buttonTable).center().row();
+
+        dialog.getContentTable().add(content).expand().fill().pad(80f);
+
+        return dialog;
+    }
+
+    public interface ConfirmationListener {
+        void onConfirm();
+        void onCancel();
     }
 }

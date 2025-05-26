@@ -26,14 +26,12 @@ public class SignUpScreen implements Screen {
     private float lastKeyboardHeight = 0f;
     final int MAX_USERNAME_LENGTH = 10;
     private TextField usernameField;
-    private ConnectivityChecker connectivityChecker;
 
     public SignUpScreen(ChoiceboundGame game) {
         this.game = game;
         this.stage = new Stage(new ScreenViewport());
         this.uiElementFactory = new UIElementFactory(game.getResourceManager(), game.getSkin());
         this.table = new Table();
-        this.connectivityChecker = new ConnectivityChecker(game.getPlatformBridge(), game.getOverlayManager());
         Gdx.input.setInputProcessor(stage);
 
         this.backgroundColor = game.getSkin().getColor("parchment_light");
@@ -95,7 +93,7 @@ public class SignUpScreen implements Screen {
                 String uid = game.getPlatformBridge().getCurrentUserId();
 
                 if (game.getPlatformBridge().isUserAuthenticated() && uid != null) {
-                    if (connectivityChecker.checkConnectivity(stage)) {
+                    if (game.getConnectivityChecker().checkConnectivity(stage)) {
                         if (!username.isEmpty()) {
                             Gdx.app.log("SignUpScreen", "Registro con username: " + username);
                             LocalUser potentialUser = new LocalUser(username, uid);
@@ -120,6 +118,7 @@ public class SignUpScreen implements Screen {
     private void onSignUpSuccess() {
         Gdx.app.log("SignUpScreen", "Registro exitoso, redirigiendo a HomeScreen");
         game.setLocalUser(new LocalUser(usernameField.getText(), game.getPlatformBridge().getCurrentUserId()));
+        Gdx.input.setOnscreenKeyboardVisible(false);
         Gdx.app.postRunnable(() -> game.setScreen(new HomeScreen(game)));
     }
 

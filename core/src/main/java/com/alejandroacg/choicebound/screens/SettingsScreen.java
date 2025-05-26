@@ -9,10 +9,12 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import static com.alejandroacg.choicebound.utils.GameConfig.HEADER_HEIGHT_RATIO;
@@ -47,12 +49,13 @@ public class SettingsScreen implements Screen {
         // Crear y configurar el título
         Label titleLabel = uiElementFactory.createTitleLabel(GameConfig.getString("settings"));
         titleLabel.setFontScale(titleScale);
-        titleLabel.setAlignment(1); // Align.center
+        titleLabel.setAlignment(Align.center);
 
-        // Subtabla interna para centrar verticalmente
+        // Crear una subtabla para centrar verticalmente
         Table headerContent = new Table();
         headerContent.setFillParent(true);
         headerContent.add(titleLabel).expand().center();
+
         header.addActor(headerContent);
 
         // Añadir el header al layout principal
@@ -63,35 +66,55 @@ public class SettingsScreen implements Screen {
             .fillX()
             .row();
 
-        // Subtabla para centrar contenido debajo del header
-        Table bodyTable = new Table();
-        bodyTable.center();
+        // Espacio entre el header y los botones
+        mainTable.add().height(50).row();
 
         // Botón "Eliminar cuenta"
         TextButton deleteAccountButton = uiElementFactory.createDefaultButton(GameConfig.getString("delete_account"));
         deleteAccountButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                Gdx.app.log("SettingsScreen", "Botón Eliminar cuenta pulsado");
-                // TODO: lógica para eliminar cuenta
+                Dialog confirmationDialog = uiElementFactory.createConfirmationDialog(
+                    GameConfig.getString("delete_confirmation"),
+                    new UIElementFactory.ConfirmationListener() {
+                        @Override
+                        public void onConfirm() {
+                            if (game.getConnectivityChecker().checkConnectivity(stage)) {
+                                game.getUserDataManager().deleteUserData(
+                                    () -> {
+                                        Gdx.app.log("SettingsScreen", "Cuenta eliminada con éxito, redirigiendo a SplashScreen");
+                                        game.signOut();
+                                    },
+                                    error -> {
+                                        Gdx.app.log("SettingsScreen", "Error al eliminar cuenta: " + error);
+                                        game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("error_message"));
+                                    }
+                                );
+                            }
+                        }
+
+                        @Override
+                        public void onCancel() {
+                            Gdx.app.log("SettingsScreen", "Eliminación cancelada.");
+                            // Nada más si no quieres overlay
+                        }
+                    }
+                );
+                confirmationDialog.show(stage);
             }
         });
+        mainTable.add(deleteAccountButton).center().padBottom(20).row();
 
         // Botón "Atrás"
-        TextButton backButton = uiElementFactory.createDefaultButton(GameConfig.getString("back"));
+        TextButton backButton = uiElementFactory.createDefaultButton("Atrás");
         backButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                Gdx.app.log("SettingsScreen", "Botón Atrás pulsado");
+                Gdx.app.log("SettingsScreen", "Volviendo a la pantalla anterior.");
                 game.setScreen(new HomeScreen(game));
             }
         });
-
-        bodyTable.add(deleteAccountButton).padBottom(20).row();
-        bodyTable.add(backButton);
-
-        // El body ocupa todo el espacio disponible restante
-        mainTable.add(bodyTable).expand().center().row();
+        mainTable.add(backButton).center();
     }
 
     @Override

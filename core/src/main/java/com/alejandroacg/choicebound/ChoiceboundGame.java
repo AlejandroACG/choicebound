@@ -7,6 +7,7 @@ import com.alejandroacg.choicebound.interfaces.PlatformBridge;
 import com.alejandroacg.choicebound.resources.ResourceManager;
 import com.alejandroacg.choicebound.screens.SplashScreen;
 import com.alejandroacg.choicebound.ui.OverlayManager;
+import com.alejandroacg.choicebound.utils.ConnectivityChecker;
 import com.alejandroacg.choicebound.utils.GameConfig;
 import com.alejandroacg.choicebound.utils.MusicManager;
 import com.badlogic.gdx.Game;
@@ -37,6 +38,8 @@ public class ChoiceboundGame extends Game {
     private LocalUser localUser;
     @Getter
     private final UserDataManager userDataManager;
+    @Getter
+    private ConnectivityChecker connectivityChecker;
 
     public ChoiceboundGame(PlatformBridge platformBridge, DatabaseInterface database) {
         this.platformBridge = platformBridge;
@@ -52,6 +55,7 @@ public class ChoiceboundGame extends Game {
         resourceManager.finishLoading();
         skin = new Skin(Gdx.files.internal("ui/skin.json"));
         overlayManager = new OverlayManager(skin, this);
+        connectivityChecker = new ConnectivityChecker(platformBridge, overlayManager);
         musicManager = new MusicManager(resourceManager);
         GameConfig.initialize();
 
@@ -94,6 +98,7 @@ public class ChoiceboundGame extends Game {
         resourceManager.dispose();
         skin.dispose();
         musicManager.dispose();
+        clearLocalUser();
     }
 
     public void clearLocalUser() {

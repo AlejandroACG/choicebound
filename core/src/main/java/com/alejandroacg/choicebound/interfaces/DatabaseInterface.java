@@ -4,6 +4,7 @@ public interface DatabaseInterface {
     void saveUserData(UserDTO userData, Consumer<Void> onSuccess, Consumer<String> onError);
     void readUserData(String uid, Consumer<UserDTO> onSuccess, Consumer<String> onError);
     void doesUserExist(String uid, Consumer<Boolean> onSuccess, Consumer<String> onError);
+    void deleteUserData(String uid, Consumer<Void> onSuccess, Consumer<String> onError); // Nuevo método
 
     class UserDTO {
         public String username;

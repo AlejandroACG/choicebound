@@ -53,4 +53,43 @@ public class FirestoreDatabase implements DatabaseInterface {
             .addOnSuccessListener(documentSnapshot -> onSuccess.accept(documentSnapshot.exists()))
             .addOnFailureListener(e -> onError.accept("Error al comprobar existencia de usuario: " + e.getMessage()));
     }
+
+    @Override
+    public void deleteUserData(String uid, Consumer<Void> onSuccess, Consumer<String> onError) {
+        // Eliminar subcolecciones Progress y Settings
+        db.collection("users").document(uid).collection("Progress")
+            .get()
+            .addOnSuccessListener(progressSnapshots -> {
+                for (var doc : progressSnapshots.getDocuments()) {
+                    doc.getReference().delete();
+                }
+                // Eliminar subcolección Settings
+                db.collection("users").document(uid).collection("Settings")
+                    .get()
+                    .addOnSuccessListener(settingsSnapshots -> {
+                        for (var doc : settingsSnapshots.getDocuments()) {
+                            doc.getReference().delete();
+                        }
+                        // Eliminar el documento principal del usuario
+                        db.collection("users").document(uid)
+                            .delete()
+                            .addOnSuccessListener(aVoid -> {
+                                Gdx.app.log("FirestoreDatabase", "Usuario eliminado con éxito: " + uid);
+                                onSuccess.accept(null);
+                            })
+                            .addOnFailureListener(e -> {
+                                Gdx.app.error("FirestoreDatabase", "Error al eliminar usuario: " + e.getMessage());
+                                onError.accept(e.getMessage());
+                            });
+                    })
+                    .addOnFailureListener(e -> {
+                        Gdx.app.error("FirestoreDatabase", "Error al eliminar subcolección Settings: " + e.getMessage());
+                        onError.accept(e.getMessage());
+                    });
+            })
+            .addOnFailureListener(e -> {
+                Gdx.app.error("FirestoreDatabase", "Error al eliminar subcolección Progress: " + e.getMessage());
+                onError.accept(e.getMessage());
+            });
+    }
 }

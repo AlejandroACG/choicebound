@@ -36,7 +36,6 @@ public class UserDataManager {
     }
 
     public void saveUserData(LocalUser localUser, Runnable onSuccess, DatabaseInterface.Consumer<String> onError) {
-        // Verificar que el uid no sea null
         String uid = localUser.getUid();
         if (uid == null) {
             Gdx.app.error("UserDataManager", "No se puede guardar usuario, UID es null");
@@ -44,10 +43,8 @@ public class UserDataManager {
             return;
         }
 
-        // Mapear LocalUser a UserDTO
         DatabaseInterface.UserDTO userDTO = new DatabaseInterface.UserDTO(localUser.getUsername(), uid);
 
-        // Guardar en Firestore
         game.getDatabase().saveUserData(
             userDTO,
             success -> {
@@ -56,6 +53,28 @@ public class UserDataManager {
             },
             error -> {
                 Gdx.app.error("UserDataManager", "Error al guardar usuario: " + error);
+                onError.accept(error);
+            }
+        );
+    }
+
+    public void deleteUserData(Runnable onSuccess, DatabaseInterface.Consumer<String> onError) {
+        String uid = game.getLocalUser().getUid();
+        if (uid == null) {
+            Gdx.app.error("UserDataManager", "No se puede eliminar usuario, UID es null");
+            onError.accept("No se puede eliminar usuario, UID es null");
+            return;
+        }
+
+        game.getDatabase().deleteUserData(
+            uid,
+            success -> {
+                Gdx.app.log("UserDataManager", "Usuario y subcolecciones eliminados con éxito: " + uid);
+                game.clearLocalUser(); // Limpiar LocalUser después de eliminar
+                onSuccess.run();
+            },
+            error -> {
+                Gdx.app.error("UserDataManager", "Error al eliminar usuario: " + error);
                 onError.accept(error);
             }
         );

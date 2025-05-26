@@ -28,7 +28,6 @@ public class SplashScreen implements Screen {
     private boolean isAnimationStarted, isAnimationFinished, isGameAssetsLoaded;
     private TextureRegion lastFrame;
     private Container<Table> buttonContainer;
-    private ConnectivityChecker connectivityChecker;
     private UIElementFactory uiElementFactory;
     private Group currentOverlay;
 
@@ -69,7 +68,6 @@ public class SplashScreen implements Screen {
         resourceManager.loadGameAssets();
 
         Gdx.input.setInputProcessor(stage);
-        this.connectivityChecker = new ConnectivityChecker(game.getPlatformBridge(), game.getOverlayManager());
         this.uiElementFactory = new UIElementFactory(game.getResourceManager(), game.getSkin());
     }
 
@@ -80,7 +78,7 @@ public class SplashScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 Gdx.app.log("SplashScreen", "Botón pulsado, iniciando One Tap Sign-In");
-                if (connectivityChecker.checkConnectivity(stage)) {
+                if (game.getConnectivityChecker().checkConnectivity(stage)) {
                     currentOverlay = game.getOverlayManager().showOverlay(stage);
                     game.getPlatformBridge().startOneTapSignIn();
                 }
@@ -156,7 +154,7 @@ public class SplashScreen implements Screen {
                 String uid = game.getPlatformBridge().getCurrentUserId();
 
                 // Verificar conectividad antes de autenticación
-                if (connectivityChecker.checkConnectivity(stage) && game.getPlatformBridge().isUserAuthenticated() && uid != null) {
+                if (game.getConnectivityChecker().checkConnectivity(stage) && game.getPlatformBridge().isUserAuthenticated() && uid != null) {
                     game.getDatabase().doesUserExist(
                         uid,
                         exists -> {
