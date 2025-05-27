@@ -74,18 +74,34 @@ public class LanguagesScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 Gdx.app.log("LanguagesScreen", "Seleccionando idioma inglés.");
-                game.setScreen(new LanguagesScreen(game));
+                if (game.getConnectivityChecker().checkConnectivity(stage)) {
+                    GameConfig.setCurrentLanguage("en");
+                    game.getLocalUser().setPrefLanguage("en");
+                    game.getDataManager().saveUserData(
+                        game.getLocalUser(),
+                        () -> Gdx.app.postRunnable(() -> game.setScreen(new LanguagesScreen(game))),
+                        error -> Gdx.app.log("LanguagesScreen", "Error al guardar idioma: " + error)
+                    );
+                }
             }
         });
         mainTable.add(englishButton).center().padBottom(20).row();
 
-        // Botón "Idiomas"
+        // Botón "Español"
         TextButton spanishButton = uiElementFactory.createDefaultButton(GameConfig.getString("spanish"));
         spanishButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 Gdx.app.log("LanguagesScreen", "Seleccionando idioma español.");
-                game.setScreen(new LanguagesScreen(game));
+                if (game.getConnectivityChecker().checkConnectivity(stage)) {
+                    GameConfig.setCurrentLanguage("es");
+                    game.getLocalUser().setPrefLanguage("es");
+                    game.getDataManager().saveUserData(
+                        game.getLocalUser(),
+                        () -> Gdx.app.postRunnable(() -> game.setScreen(new LanguagesScreen(game))),
+                        error -> Gdx.app.log("LanguagesScreen", "Error al guardar idioma: " + error)
+                    );
+                }
             }
         });
         mainTable.add(spanishButton).center().padBottom(20).row();

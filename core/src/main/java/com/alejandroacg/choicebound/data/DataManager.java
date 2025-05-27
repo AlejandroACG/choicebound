@@ -2,6 +2,7 @@ package com.alejandroacg.choicebound.data;
 
 import com.alejandroacg.choicebound.ChoiceboundGame;
 import com.alejandroacg.choicebound.interfaces.DatabaseInterface;
+import com.alejandroacg.choicebound.utils.GameConfig;
 import com.badlogic.gdx.Gdx;
 
 import java.lang.reflect.Field;
@@ -25,6 +26,7 @@ public class DataManager {
                     game.getLocalUser().setUsername(userDTO.username);
                     game.getLocalUser().setUid(uid);
                     game.getLocalUser().setPrefLanguage(userDTO.pref_language);
+                    GameConfig.setCurrentLanguage(userDTO.pref_language);
                     Gdx.app.log("UserDataManager", "Datos de usuario cargados desde Firestore: " + userDTO.username);
                     onSuccess.run();
                 },

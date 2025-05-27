@@ -110,7 +110,7 @@ public class SettingsScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 Gdx.app.log("SettingsScreen", "Yendo a la pantalla de idiomas.");
-                game.setScreen(new HomeScreen(game));
+                game.setScreen(new LanguagesScreen(game));
             }
         });
         mainTable.add(languagesButton).center().padBottom(20).row();

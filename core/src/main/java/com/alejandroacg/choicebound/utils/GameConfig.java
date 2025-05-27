@@ -43,6 +43,27 @@ public class GameConfig {
         );
     }
 
+    public static void setCurrentLanguage(String language) {
+        String[] supportedLanguages = {"es", "en"};
+        String selectedLanguage = "en"; // Predeterminado
+
+        for (String lang : supportedLanguages) {
+            if (language.equals(lang)) {
+                selectedLanguage = lang;
+                break;
+            }
+        }
+
+        currentLanguage = selectedLanguage;
+        Gdx.app.log("GameConfig", "Idioma actualizado: " + currentLanguage);
+
+        strings = I18NBundle.createBundle(
+            Gdx.files.internal("i18n/strings_" + currentLanguage),
+            new Locale(currentLanguage),
+            StandardCharsets.UTF_8.name()
+        );
+    }
+
     public static String getString(String key) {
         return strings.get(key);
     }
