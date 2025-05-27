@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class LocalUser {
     private String username;
     private String uid;
+    private String prefLanguage;
 }

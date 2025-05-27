@@ -2,7 +2,6 @@ package com.alejandroacg.choicebound.data;
 
 import com.alejandroacg.choicebound.ChoiceboundGame;
 import com.alejandroacg.choicebound.interfaces.DatabaseInterface;
-import com.alejandroacg.choicebound.utils.GameConfig;
 import com.badlogic.gdx.Gdx;
 
 import java.lang.reflect.Field;
@@ -11,6 +10,7 @@ import java.util.List;
 
 public class DataManager {
     private final ChoiceboundGame game;
+    private final String currentLanguage = "es";
 
     public DataManager(ChoiceboundGame game) {
         this.game = game;
@@ -24,6 +24,7 @@ public class DataManager {
                 userDTO -> {
                     game.getLocalUser().setUsername(userDTO.username);
                     game.getLocalUser().setUid(uid);
+                    game.getLocalUser().setPrefLanguage(userDTO.pref_language);
                     Gdx.app.log("UserDataManager", "Datos de usuario cargados desde Firestore: " + userDTO.username);
                     onSuccess.run();
                 },
@@ -47,9 +48,13 @@ public class DataManager {
             return;
         }
 
-        DatabaseInterface.UserDTO userDTO = new DatabaseInterface.UserDTO(localUser.getUsername(), uid);
+        DatabaseInterface.UserDTO userDTO = new DatabaseInterface.UserDTO(
+            localUser.getUsername(),
+            localUser.getPrefLanguage()
+        );
 
         game.getDatabase().saveUserData(
+            uid, // Pasamos el uid como parámetro separado
             userDTO,
             success -> {
                 Gdx.app.log("UserDataManager", "Usuario guardado con éxito: " + uid);
@@ -89,22 +94,21 @@ public class DataManager {
             adventureDTOs -> {
                 List<LocalAdventure> adventures = new ArrayList<>();
                 for (DatabaseInterface.AdventureDTO dto : adventureDTOs) {
-                    // Seleccionar el título dinámicamente según el idioma actual
                     String title = null;
                     try {
-                        Field titleField = DatabaseInterface.AdventureDTO.class.getDeclaredField("title_" + GameConfig.getCurrentLanguage());
+                        Field titleField = DatabaseInterface.AdventureDTO.class.getDeclaredField("title_" + currentLanguage);
                         titleField.setAccessible(true);
                         title = (String) titleField.get(dto);
                     } catch (NoSuchFieldException | IllegalAccessException e) {
-                        Gdx.app.log("UserDataManager", "Idioma no encontrado: " + GameConfig.getCurrentLanguage() + ", usando español como fallback");
+                        Gdx.app.log("UserDataManager", "Idioma no encontrado: " + currentLanguage + ", usando español como fallback");
                         title = dto.title_es;
                     }
                     if (title == null) {
-                        Gdx.app.log("UserDataManager", "Título no encontrado para idioma: " + GameConfig.getCurrentLanguage());
+                        Gdx.app.log("UserDataManager", "Título no encontrado para idioma: " + currentLanguage);
                         title = dto.title_es;
                     }
                     LocalAdventure adventure = new LocalAdventure(
-                        dto.uid,
+                        "", // El uid se asignará en FirestoreDatabase
                         dto.acquired,
                         title,
                         dto.cover

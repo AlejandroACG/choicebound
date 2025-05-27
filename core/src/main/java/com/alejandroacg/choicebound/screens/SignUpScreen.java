@@ -95,7 +95,7 @@ public class SignUpScreen implements Screen {
                     if (game.getConnectivityChecker().checkConnectivity(stage)) {
                         if (!username.isEmpty()) {
                             Gdx.app.log("SignUpScreen", "Registro con username: " + username);
-                            LocalUser potentialUser = new LocalUser(username, uid);
+                            LocalUser potentialUser = new LocalUser(username, uid, GameConfig.getCurrentLanguage());
                             game.getDataManager().saveUserData(
                                 potentialUser,
                                 () -> onSignUpSuccess(),
@@ -116,7 +116,8 @@ public class SignUpScreen implements Screen {
 
     private void onSignUpSuccess() {
         Gdx.app.log("SignUpScreen", "Registro exitoso, redirigiendo a HomeScreen");
-        game.setLocalUser(new LocalUser(usernameField.getText(), game.getPlatformBridge().getCurrentUserId()));
+        game.setLocalUser(new LocalUser(usernameField.getText(),
+            game.getPlatformBridge().getCurrentUserId(), GameConfig.getCurrentLanguage()));
         Gdx.input.setOnscreenKeyboardVisible(false);
         Gdx.app.postRunnable(() -> game.setScreen(new HomeScreen(game)));
     }

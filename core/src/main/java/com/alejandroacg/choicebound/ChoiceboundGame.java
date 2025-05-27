@@ -7,9 +7,9 @@ import com.alejandroacg.choicebound.interfaces.PlatformBridge;
 import com.alejandroacg.choicebound.resources.ResourceManager;
 import com.alejandroacg.choicebound.screens.SplashScreen;
 import com.alejandroacg.choicebound.ui.OverlayManager;
-import com.alejandroacg.choicebound.utils.ConnectivityChecker;
 import com.alejandroacg.choicebound.utils.GameConfig;
 import com.alejandroacg.choicebound.utils.MusicManager;
+import com.alejandroacg.choicebound.utils.ConnectivityChecker;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -98,7 +98,6 @@ public class ChoiceboundGame extends Game {
         resourceManager.dispose();
         skin.dispose();
         musicManager.dispose();
-        clearLocalUser();
     }
 
     public void clearLocalUser() {

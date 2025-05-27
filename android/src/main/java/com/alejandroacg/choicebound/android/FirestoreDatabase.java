@@ -16,8 +16,7 @@ public class FirestoreDatabase implements DatabaseInterface {
     }
 
     @Override
-    public void saveUserData(UserDTO userData, Consumer<Void> onSuccess, Consumer<String> onError) {
-        String uid = userData.uid;
+    public void saveUserData(String uid, UserDTO userData, Consumer<Void> onSuccess, Consumer<String> onError) {
         if (uid == null) {
             onError.accept("UID no puede ser nulo");
             return;
@@ -104,7 +103,6 @@ public class FirestoreDatabase implements DatabaseInterface {
                     Gdx.app.log("FirestoreDatabase", "Documento: " + doc.getId() + ", Datos: " + doc.getData());
                     AdventureDTO adventure = doc.toObject(AdventureDTO.class);
                     if (adventure != null) {
-                        adventure.uid = doc.getId();
                         adventures.add(adventure);
                         Gdx.app.log("FirestoreDatabase", "Aventura mapeada: " + adventure.title_es);
                     } else {
