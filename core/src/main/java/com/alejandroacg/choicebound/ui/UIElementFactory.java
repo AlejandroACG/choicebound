@@ -164,7 +164,7 @@ public class UIElementFactory {
         BitmapFont fontCopy = new BitmapFont(labelStyle.font.getData(), labelStyle.font.getRegions(), labelStyle.font.usesIntegerPositions());
         fontCopy.getData().setScale(1f);
 
-        TextureRegion backgroundRegion = resourceManager.getAtlas("ui").findRegion("container_parchment");
+        TextureRegion backgroundRegion = resourceManager.getAtlas("ui").findRegion("dialog_parchment");
 
         WindowStyle dialogStyle = new WindowStyle();
         dialogStyle.titleFont = fontCopy;
@@ -197,7 +197,7 @@ public class UIElementFactory {
         messageLabel.setWrap(true);
         messageLabel.setFontScale(1.5f);
         messageLabel.setAlignment(Align.center);
-        float labelWidth = Gdx.graphics.getWidth() * 0.75f - 160f; // 80f padding a cada lado
+        float labelWidth = Gdx.graphics.getWidth() * 0.75f - 180f; // 80f padding a cada lado
         content.add(messageLabel).width(labelWidth).center().row();
 
         // Botones personalizados

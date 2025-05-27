@@ -9,5 +9,7 @@ button_parchment_pressed
 bounds:910,37,160,85
 container_parchment
 bounds:2,2,582,120
+dialog_parchment
+bounds:1072,26,96,96
 home
-bounds:1072,64,56,58
+bounds:1170,64,56,58

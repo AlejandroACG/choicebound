@@ -15,7 +15,11 @@
     "light_grey": { "r": 0.8, "g": 0.8, "b": 0.8, "a": 1 },
     "crimson": { "r": 0.86, "g": 0.08, "b": 0.24, "a": 1 },
     "soft_white": { "r": 0.98, "g": 0.98, "b": 0.98, "a": 1 },
-    "brown_header": { "r": 0.47, "g": 0.29, "b": 0.13, "a": 1 }
+    "brown_header": { "r": 0.47, "g": 0.29, "b": 0.13, "a": 1 },
+    "forest_green": { "r": 0.13, "g": 0.55, "b": 0.13, "a": 1 },
+    "burnt_orange": { "r": 0.8, "g": 0.33, "b": 0.0, "a": 1 },
+    "deep_purple": { "r": 0.6, "g": 0.4, "b": 0.7, "a": 1 },
+    "dark_red": { "r": 0.8, "g": 0.0, "b": 0.0, "a": 1 }
   },
   "com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle": {
     "google": {
@@ -30,6 +34,26 @@
       "font": "crimson_text",
       "fontColor": "grey"
     },
+    "roleplay_narrative_light_grey": {
+      "font": "crimson_text",
+      "fontColor": "light_grey"
+    },
+    "roleplay_narrative_green": {
+      "font": "crimson_text",
+      "fontColor": "forest_green"
+    },
+    "roleplay_narrative_orange": {
+      "font": "crimson_text",
+      "fontColor": "burnt_orange"
+    },
+    "roleplay_narrative_purple": {
+      "font": "crimson_text",
+      "fontColor": "deep_purple"
+    },
+    "roleplay_narrative_red": {
+      "font": "crimson_text",
+      "fontColor": "dark_red"
+    },
     "roleplay_narrative_crimson": {
       "font": "crimson_text",
       "fontColor": "crimson"
@@ -41,7 +65,8 @@
     "roleplay_title": {
       "font": "alegreya",
       "fontColor": "black"
-    },"roleplay_title_bold": {
+    },
+    "roleplay_title_bold": {
       "font": "alegreya_bold",
       "fontColor": "black"
     },
