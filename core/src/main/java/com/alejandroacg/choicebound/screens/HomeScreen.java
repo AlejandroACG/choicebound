@@ -53,7 +53,6 @@ public class HomeScreen implements Screen {
         float titleScale = 3f;
         float subtitleScale = 2f;
 
-        // Header
         Table header = uiElementFactory.createHeader();
 
         Label titleLabel = uiElementFactory.createTitleLabel(GameConfig.getString("title_choicebound"));
@@ -68,7 +67,6 @@ public class HomeScreen implements Screen {
         welcomeLabel.setFontScale(subtitleScale);
         welcomeLabel.setAlignment(Align.center);
 
-        // Botones: Store, Settings y Refresh
         TextButton storeButton = uiElementFactory.createDefaultButton(GameConfig.getString("store_button"));
         storeButton.setDisabled(true);
 
@@ -88,7 +86,6 @@ public class HomeScreen implements Screen {
             }
         });
 
-        // Tabla de botones horizontal
         Table buttonsTable = new Table();
         buttonsTable.add(storeButton).padRight(20);
         buttonsTable.add(settingsButton).padRight(20);
@@ -110,7 +107,6 @@ public class HomeScreen implements Screen {
             .fillX()
             .row();
 
-        // Contenido scrolleable (solo se instancia aquí)
         scrollContent = new Table();
         scrollContent.top();
 
@@ -121,7 +117,6 @@ public class HomeScreen implements Screen {
         mainTable.add(scrollPane).expand().fill().row();
         mainTable.add().height(20).row();
 
-        // Botón de Sign Out (fuera del scroll, siempre abajo)
         TextButton signOutButton = uiElementFactory.createDefaultButton(GameConfig.getString("sign_out"));
         signOutButton.addListener(new ChangeListener() {
             @Override
@@ -137,7 +132,6 @@ public class HomeScreen implements Screen {
     public void show() {
         game.getMusicManager().playIfDifferent("main_menu");
 
-        // Cargar las aventuras desde Firestore
         game.getDataManager().loadAllAdventures(
             loadedAdventures -> {
                 adventures = loadedAdventures;
@@ -147,15 +141,15 @@ public class HomeScreen implements Screen {
                     for (int i = 0; i < adventures.size(); i++) {
                         LocalAdventure adventure = adventures.get(i);
 
-                        // Determinar si la aventura está desbloqueada para el usuario
                         boolean isUnlocked = false;
+                        boolean hasProgress = false;
                         Map<String, LocalUser.LocalProgress> userProgress = game.getLocalUser().getProgress();
                         if (userProgress != null && userProgress.containsKey(adventure.getUid())) {
                             LocalUser.LocalProgress progress = userProgress.get(adventure.getUid());
                             isUnlocked = progress.isUnlocked();
+                            hasProgress = progress.getCurrentNode() != null;
                         }
 
-                        // Determinar la imagen a mostrar
                         String coverKey = isUnlocked ? adventure.getCover() : adventure.getCover() + "_locked";
                         Gdx.app.log("Adventure", "Intentando cargar la textura: " + coverKey);
                         TextureRegion coverRegion = game.getResourceManager().getAtlas("covers").findRegion(coverKey);
@@ -163,25 +157,31 @@ public class HomeScreen implements Screen {
                         coverImage.setScaling(Scaling.fit);
                         coverImage.setAlign(Align.center);
 
-                        // Crear el título
                         Label titleLabel = uiElementFactory.createBoldTitleLabel(adventure.getTitle());
                         titleLabel.setAlignment(Align.center);
                         titleLabel.setWrap(true);
                         titleLabel.setFontScale(3f);
 
-                        // Crear los botones
                         TextButton newAdventureButton = uiElementFactory.createDefaultButton(GameConfig.getString("new_adventure"));
                         TextButton continueAdventureButton = uiElementFactory.createDefaultButton(GameConfig.getString("continue_adventure"));
 
-                        // Deshabilitar botones si la aventura está bloqueada
                         newAdventureButton.setDisabled(!isUnlocked);
-                        continueAdventureButton.setDisabled(!isUnlocked);
+                        continueAdventureButton.setDisabled(!isUnlocked || !hasProgress);
 
-                        // Añadir listeners a los botones según sea necesario
                         newAdventureButton.addListener(new ChangeListener() {
                             @Override
                             public void changed(ChangeEvent event, Actor actor) {
-                                // Lógica para nueva aventura
+                                game.getOverlayManager().showOverlay(stage);
+                                LocalUser.LocalProgress progress = game.getLocalUser().getProgress().get(adventure.getUid());
+                                if (progress != null) {
+                                    progress.setCurrentLives(adventure.getInitialLives());
+                                    progress.setCurrentHero(adventure.getInitialHero());
+                                    progress.setCurrentCoward(adventure.getInitialCoward());
+                                    progress.setCurrentKiller(adventure.getInitialKiller());
+                                }
+                                game.getResourceManager().loadAdventureArt(adventure.getUid(), () -> {
+                                    game.setScreen(new AdventureScreen(game, adventure, "node000"));
+                                });
                             }
                         });
 
@@ -192,23 +192,19 @@ public class HomeScreen implements Screen {
                             }
                         });
 
-                        // Crear una tabla para los botones
                         Table buttonsTable = new Table();
                         buttonsTable.add(newAdventureButton).padRight(20f);
                         buttonsTable.add(continueAdventureButton);
 
-                        // Crear una tabla para el contenido de la aventura
                         Table adventureTable = new Table();
                         adventureTable.add(coverImage).center().row();
                         adventureTable.add(titleLabel).expandX().fillX().padBottom(10f).row();
                         adventureTable.add(buttonsTable).center();
 
-                        // Envolver la tabla en un contenedor con fondo pergamino
                         Container<Table> wrappedAdventure = new Container<>(adventureTable);
                         wrappedAdventure.setBackground(new TextureRegionDrawable(game.getResourceManager().getAtlas("ui").findRegion("container_parchment")));
                         wrappedAdventure.padTop(150f).padBottom(150f).padLeft(50f).padRight(50f);
 
-                        // Añadir el contenedor al contenido del scroll
                         scrollContent.add(wrappedAdventure).width(Gdx.graphics.getWidth() * 0.9f).pad(20f).row();
                     }
                 });

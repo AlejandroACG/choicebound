@@ -1,56 +1,80 @@
 package com.alejandroacg.choicebound.resources;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.utils.async.AsyncExecutor;
+import com.badlogic.gdx.utils.async.AsyncTask;
 
 public class ResourceManager {
     private final AssetManager manager;
+    private final AsyncExecutor asyncExecutor;
 
     public ResourceManager() {
         manager = new AssetManager();
+        asyncExecutor = new AsyncExecutor(1);
     }
 
-    // Carga los assets necesarios para el splash
     public void loadSplashAssets() {
         manager.load("textures/intro.atlas", TextureAtlas.class);
         manager.load("textures/ui_pre_loaded.atlas", TextureAtlas.class);
         manager.load("music/splash_screen.mp3", Music.class);
     }
 
-    // Carga los assets necesarios para el resto del juego
     public void loadGameAssets() {
         manager.load("textures/ui.atlas", TextureAtlas.class);
         manager.load("textures/covers.atlas", TextureAtlas.class);
         manager.load("music/main_menu.mp3", Music.class);
-        manager.load("music/adventure_0_main.mp3", Music.class);
+        manager.load("music/adventure0_main.mp3", Music.class);
         manager.load("sounds/ui_click.wav", Sound.class);
     }
 
-    // Verifica si los assets están cargados
+    public void loadAdventureArt(String adventure, Runnable onComplete) {
+        String atlasPath = "textures/" + adventure + "_art.atlas";
+        if (!manager.isLoaded(atlasPath)) {
+            manager.load(atlasPath, TextureAtlas.class);
+            asyncExecutor.submit(new AsyncTask<Void>() {
+                @Override
+                public Void call() {
+                    while (!manager.isLoaded(atlasPath)) {
+                        manager.update();
+                    }
+                    Gdx.app.postRunnable(onComplete);
+                    return null;
+                }
+            });
+        } else {
+            Gdx.app.postRunnable(onComplete);
+        }
+    }
+
+    public void unloadAdventureArt(String adventure) {
+        String atlasPath = "textures/" + adventure + "_art.atlas";
+        if (manager.isLoaded(atlasPath)) {
+            manager.unload(atlasPath);
+        }
+    }
+
     public boolean update() {
         return manager.update();
     }
 
-    // Finaliza la carga de todos los assets en cola de manera síncrona
     public void finishLoading() {
         manager.finishLoading();
     }
 
-    // Obtiene el progreso de carga (de 0 a 1)
     public float getProgress() {
         return manager.getProgress();
     }
 
-    // Acceso a los atlas cargados
     public TextureAtlas getAtlas(String atlasName) {
         return manager.get("textures/" + atlasName + ".atlas", TextureAtlas.class);
     }
 
     public Music getMusic(String musicName) {
         String path = "music/" + musicName + ".mp3";
-        // Si el archivo no está cargado, lo cargamos
         if (!manager.isLoaded(path)) {
             manager.load(path, Music.class);
             manager.finishLoadingAsset(path);
@@ -69,5 +93,6 @@ public class ResourceManager {
 
     public void dispose() {
         manager.dispose();
+        asyncExecutor.dispose();
     }
 }

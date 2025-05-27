@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -41,6 +42,19 @@ public class OverlayManager {
         Image background = new Image(drawable);
         background.setSize(stage.getWidth(), stage.getHeight());
         overlayGroup.addActor(background);
+
+        // Añadir círculo giratorio en el centro
+        TextureRegionDrawable loadingCircleDrawable = new TextureRegionDrawable(
+            game.getResourceManager().getAtlas("ui_pre_loaded").findRegion("loading_circle"));
+        Image loadingCircle = new Image(loadingCircleDrawable);
+        loadingCircle.setSize(200, 200);
+        loadingCircle.setPosition(
+            (stage.getWidth() - loadingCircle.getWidth()) / 2,
+            (stage.getHeight() - loadingCircle.getHeight()) / 2
+        );
+        loadingCircle.setOrigin(Align.center);
+        loadingCircle.addAction(Actions.forever(Actions.rotateBy(360, 1)));
+        overlayGroup.addActor(loadingCircle);
 
         stage.addActor(overlayGroup);
 
