@@ -129,7 +129,7 @@ public class HomeScreen implements Screen {
     }
 
     private void startNewAdventure(LocalAdventure adventure) {
-        game.getOverlayManager().showOverlay(stage);
+        game.getOverlayManager().showLoadingOverlay(stage);
         LocalUser.LocalProgress progress = game.getLocalUser().getProgress().get(adventure.getUid());
         if (progress != null) {
             progress.setCurrentLives(adventure.getInitialLives());
@@ -148,7 +148,7 @@ public class HomeScreen implements Screen {
             },
             error -> {
                 Gdx.app.error("HomeScreen", "Error al guardar usuario: " + error);
-                game.getOverlayManager().hideOverlay(game.getOverlayManager().showOverlay(stage));
+                game.getOverlayManager().hideOverlay(game.getOverlayManager().showLoadingOverlay(stage));
                 game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("error_message"));
             }
         );
@@ -158,106 +158,106 @@ public class HomeScreen implements Screen {
     public void show() {
         game.getMusicManager().playIfDifferent("main_menu");
 
-        game.getDataManager().loadAllAdventures(
-            loadedAdventures -> {
-                adventures = loadedAdventures;
-                Gdx.app.log("HomeScreen", "Aventuras cargadas: " + adventures.size());
-                Gdx.app.postRunnable(() -> {
-                    scrollContent.clear();
-                    for (int i = 0; i < adventures.size(); i++) {
-                        LocalAdventure adventure = adventures.get(i);
+        if (game.getConnectivityChecker().checkConnectivity(stage)) {
+            game.getDataManager().loadAllAdventures(
+                loadedAdventures -> {
+                    adventures = loadedAdventures;
+                    Gdx.app.log("HomeScreen", "Aventuras cargadas: " + adventures.size());
+                    Gdx.app.postRunnable(() -> {
+                        scrollContent.clear();
+                        for (LocalAdventure adventure : adventures) {
+                            boolean isUnlocked = false;
+                            boolean hasProgress = false;
+                            Map<String, LocalUser.LocalProgress> userProgress = game.getLocalUser().getProgress();
+                            if (userProgress != null && userProgress.containsKey(adventure.getUid())) {
+                                LocalUser.LocalProgress progress = userProgress.get(adventure.getUid());
+                                isUnlocked = progress.isUnlocked();
+                                hasProgress = progress.getCurrentNode() != null;
+                            }
 
-                        boolean isUnlocked = false;
-                        boolean hasProgress = false;
-                        Map<String, LocalUser.LocalProgress> userProgress = game.getLocalUser().getProgress();
-                        if (userProgress != null && userProgress.containsKey(adventure.getUid())) {
-                            LocalUser.LocalProgress progress = userProgress.get(adventure.getUid());
-                            isUnlocked = progress.isUnlocked();
-                            hasProgress = progress.getCurrentNode() != null;
-                        }
+                            final boolean finalHasProgress = hasProgress; // Variable final para usar en lambda
+                            final String currentNodeId = hasProgress ? userProgress.get(adventure.getUid()).getCurrentNode() : "node000"; // Obtener currentNode
 
-                        final boolean finalHasProgress = hasProgress; // Variable final para usar en lambda
-                        final String currentNodeId = hasProgress ? userProgress.get(adventure.getUid()).getCurrentNode() : "node000"; // Obtener currentNode
+                            String coverKey = isUnlocked ? adventure.getCover() : adventure.getCover() + "_locked";
+                            Gdx.app.log("Adventure", "Intentando cargar la textura: " + coverKey);
+                            TextureRegion coverRegion = game.getResourceManager().getAtlas("covers").findRegion(coverKey);
+                            Image coverImage = new Image(coverRegion);
+                            coverImage.setScaling(Scaling.fit);
+                            coverImage.setAlign(Align.center);
 
-                        String coverKey = isUnlocked ? adventure.getCover() : adventure.getCover() + "_locked";
-                        Gdx.app.log("Adventure", "Intentando cargar la textura: " + coverKey);
-                        TextureRegion coverRegion = game.getResourceManager().getAtlas("covers").findRegion(coverKey);
-                        Image coverImage = new Image(coverRegion);
-                        coverImage.setScaling(Scaling.fit);
-                        coverImage.setAlign(Align.center);
+                            Label titleLabel = uiElementFactory.createBoldTitleLabel(adventure.getTitle());
+                            titleLabel.setAlignment(Align.center);
+                            titleLabel.setWrap(true);
+                            titleLabel.setFontScale(3f);
 
-                        Label titleLabel = uiElementFactory.createBoldTitleLabel(adventure.getTitle());
-                        titleLabel.setAlignment(Align.center);
-                        titleLabel.setWrap(true);
-                        titleLabel.setFontScale(3f);
+                            TextButton newAdventureButton = uiElementFactory.createDefaultButton(GameConfig.getString("new_adventure"));
+                            TextButton continueAdventureButton = uiElementFactory.createDefaultButton(GameConfig.getString("continue_adventure"));
 
-                        TextButton newAdventureButton = uiElementFactory.createDefaultButton(GameConfig.getString("new_adventure"));
-                        TextButton continueAdventureButton = uiElementFactory.createDefaultButton(GameConfig.getString("continue_adventure"));
+                            newAdventureButton.setDisabled(!isUnlocked);
+                            continueAdventureButton.setDisabled(!isUnlocked || !hasProgress);
 
-                        newAdventureButton.setDisabled(!isUnlocked);
-                        continueAdventureButton.setDisabled(!isUnlocked || !hasProgress);
+                            newAdventureButton.addListener(new ChangeListener() {
+                                @Override
+                                public void changed(ChangeEvent event, Actor actor) {
+                                    if (game.getConnectivityChecker().checkConnectivity(stage)) {
+                                        if (finalHasProgress) {
+                                            Dialog confirmationDialog = uiElementFactory.createConfirmationDialog(
+                                                GameConfig.getString("confirm_new_adventure_message"),
+                                                new UIElementFactory.ConfirmationListener() {
+                                                    @Override
+                                                    public void onConfirm() {
+                                                        startNewAdventure(adventure);
+                                                    }
 
-                        newAdventureButton.addListener(new ChangeListener() {
-                            @Override
-                            public void changed(ChangeEvent event, Actor actor) {
-                                if (game.getConnectivityChecker().checkConnectivity(stage)) {
-                                    if (finalHasProgress) {
-                                        Dialog confirmationDialog = uiElementFactory.createConfirmationDialog(
-                                            GameConfig.getString("confirm_new_adventure_message"),
-                                            new UIElementFactory.ConfirmationListener() {
-                                                @Override
-                                                public void onConfirm() {
-                                                    startNewAdventure(adventure);
+                                                    @Override
+                                                    public void onCancel() {
+                                                        // No hacer nada si se cancela
+                                                    }
                                                 }
-
-                                                @Override
-                                                public void onCancel() {
-                                                    // No hacer nada si se cancela
-                                                }
-                                            }
-                                        );
-                                        confirmationDialog.show(stage);
-                                    } else {
-                                        startNewAdventure(adventure);
+                                            );
+                                            confirmationDialog.show(stage);
+                                        } else {
+                                            startNewAdventure(adventure);
+                                        }
                                     }
                                 }
-                            }
-                        });
+                            });
 
-                        continueAdventureButton.addListener(new ChangeListener() {
-                            @Override
-                            public void changed(ChangeEvent event, Actor actor) {
-                                if (game.getConnectivityChecker().checkConnectivity(stage)) {
-                                    game.getOverlayManager().showOverlay(stage);
-                                    game.getResourceManager().loadAdventureArt(adventure.getUid(), () -> {
-                                        game.setScreen(new AdventureScreen(game, adventure, currentNodeId));
-                                    });
+                            continueAdventureButton.addListener(new ChangeListener() {
+                                @Override
+                                public void changed(ChangeEvent event, Actor actor) {
+                                    if (game.getConnectivityChecker().checkConnectivity(stage)) {
+                                        game.getOverlayManager().showLoadingOverlay(stage);
+                                        game.getResourceManager().loadAdventureArt(adventure.getUid(), () -> {
+                                            game.setScreen(new AdventureScreen(game, adventure, currentNodeId));
+                                        });
+                                    }
                                 }
-                            }
-                        });
+                            });
 
-                        Table buttonsTable = new Table();
-                        buttonsTable.add(newAdventureButton).padRight(20f);
-                        buttonsTable.add(continueAdventureButton);
+                            Table buttonsTable = new Table();
+                            buttonsTable.add(newAdventureButton).padRight(20f);
+                            buttonsTable.add(continueAdventureButton);
 
-                        Table adventureTable = new Table();
-                        adventureTable.add(coverImage).center().row();
-                        adventureTable.add(titleLabel).expandX().fillX().padBottom(10f).row();
-                        adventureTable.add(buttonsTable).center();
+                            Table adventureTable = new Table();
+                            adventureTable.add(coverImage).center().row();
+                            adventureTable.add(titleLabel).expandX().fillX().padBottom(10f).row();
+                            adventureTable.add(buttonsTable).center();
 
-                        Container<Table> wrappedAdventure = new Container<>(adventureTable);
-                        wrappedAdventure.setBackground(new TextureRegionDrawable(game.getResourceManager().getAtlas("ui").findRegion("container_parchment")));
-                        wrappedAdventure.padTop(150f).padBottom(150f).padLeft(50f).padRight(50f);
+                            Container<Table> wrappedAdventure = new Container<>(adventureTable);
+                            wrappedAdventure.setBackground(new TextureRegionDrawable(game.getResourceManager().getAtlas("ui").findRegion("container_parchment")));
+                            wrappedAdventure.padTop(150f).padBottom(150f).padLeft(50f).padRight(50f);
 
-                        scrollContent.add(wrappedAdventure).width(Gdx.graphics.getWidth() * 0.9f).pad(20f).row();
-                    }
-                });
-            },
-            error -> {
-                Gdx.app.log("HomeScreen", "Error al cargar aventuras: " + error);
-                game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("error_message"));
-            }
-        );
+                            scrollContent.add(wrappedAdventure).width(Gdx.graphics.getWidth() * 0.9f).pad(20f).row();
+                        }
+                    });
+                },
+                error -> {
+                    Gdx.app.log("HomeScreen", "Error al cargar aventuras: " + error);
+                    game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("error_message"));
+                }
+            );
+        }
     }
 
     @Override

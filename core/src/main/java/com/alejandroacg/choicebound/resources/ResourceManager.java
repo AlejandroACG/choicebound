@@ -35,15 +35,12 @@ public class ResourceManager {
         String atlasPath = "textures/" + adventure + "_art.atlas";
         if (!manager.isLoaded(atlasPath)) {
             manager.load(atlasPath, TextureAtlas.class);
-            asyncExecutor.submit(new AsyncTask<Void>() {
-                @Override
-                public Void call() {
-                    while (!manager.isLoaded(atlasPath)) {
-                        manager.update();
-                    }
-                    Gdx.app.postRunnable(onComplete);
-                    return null;
+            asyncExecutor.submit((AsyncTask<Void>) () -> {
+                while (!manager.isLoaded(atlasPath)) {
+                    manager.update();
                 }
+                Gdx.app.postRunnable(onComplete);
+                return null;
             });
         } else {
             Gdx.app.postRunnable(onComplete);

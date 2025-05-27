@@ -128,7 +128,9 @@ public class SettingsScreen implements Screen {
     }
 
     @Override
-    public void show() {}
+    public void show() {
+        game.getMusicManager().playIfDifferent("main_menu");
+    }
 
     @Override
     public void render(float delta) {

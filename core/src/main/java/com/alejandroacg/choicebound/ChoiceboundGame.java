@@ -55,7 +55,7 @@ public class ChoiceboundGame extends Game {
         resourceManager.finishLoading();
         skin = new Skin(Gdx.files.internal("ui/skin.json"));
         overlayManager = new OverlayManager(skin, this);
-        connectivityChecker = new ConnectivityChecker(platformBridge, overlayManager);
+        connectivityChecker = new ConnectivityChecker(this);
         musicManager = new MusicManager(resourceManager);
         GameConfig.initialize();
 

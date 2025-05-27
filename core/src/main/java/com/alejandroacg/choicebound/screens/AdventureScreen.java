@@ -29,17 +29,17 @@ public class AdventureScreen implements Screen {
     private Image image;
     private Table contentTable;
     private ScrollPane scrollPane;
+    private final String initialNodeId; // Guardar el nodeId para usarlo en show()
 
     public AdventureScreen(ChoiceboundGame game, LocalAdventure adventure, String nodeId) {
         this.game = game;
         this.adventure = adventure;
+        this.initialNodeId = nodeId;
         this.stage = new Stage(new ScreenViewport());
         this.uiElementFactory = new UIElementFactory(game.getResourceManager(), game.getSkin());
         this.backgroundColor = game.getSkin().getColor("parchment_light");
         Gdx.input.setInputProcessor(stage);
         setupUI();
-
-        loadNode(nodeId);
     }
 
     private void setupUI() {
@@ -82,7 +82,7 @@ public class AdventureScreen implements Screen {
         backButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.getOverlayManager().showOverlay(stage);
+                game.getOverlayManager().showLoadingOverlay(stage);
                 game.getResourceManager().unloadAdventureArt(adventure.getUid());
                 game.setScreen(new HomeScreen(game));
             }
@@ -138,100 +138,99 @@ public class AdventureScreen implements Screen {
     }
 
     private void loadNode(String nodeId) {
-        if (game.getConnectivityChecker().checkConnectivity(stage)) {
-            Group overlay = game.getOverlayManager().showOverlay(stage);
-            game.getDataManager().loadNode(
-                adventure.getUid(),
-                nodeId,
-                node -> {
-                    currentNode = node;
-                    Gdx.app.log("AdventureScreen", "Nodo cargado: " + nodeId);
-                    game.getOverlayManager().hideOverlay(overlay);
-
-                    Gdx.app.log("AdventureScreen", "Intentando cargar imagen: " + currentNode.getImage());
-                    TextureRegion imageRegion = game.getResourceManager().getAtlas(adventure.getUid() + "_art").findRegion(currentNode.getImage());
-                    if (imageRegion != null) {
-                        image.setDrawable(new TextureRegionDrawable(imageRegion));
-                    } else {
-                        Gdx.app.error("AdventureScreen", "Imagen no encontrada para el nodo: " + currentNode.getImage());
-                        image.setDrawable(null);
-                    }
-
-                    if (currentNode.getMusic() != null) {
-                        game.getMusicManager().playIfDifferent(currentNode.getMusic());
-                    }
-
-                    Label descriptionLabel = new Label(currentNode.getText(), game.getSkin(), "roleplay_narrative_light_grey");
-                    descriptionLabel.setFontScale(1.1f);
-                    descriptionLabel.setWrap(true);
-                    descriptionLabel.setAlignment(Align.center);
-
-                    Table newContentTable = new Table();
-                    newContentTable.add(descriptionLabel).expandX().fillX().padBottom(40f).row();
-
-                    for (LocalNode.LocalChoice choice : currentNode.getChoices()) {
-                        TextButton choiceButton = uiElementFactory.createDefaultButton(choice.getText());
-                        choiceButton.addListener(new ChangeListener() {
-                            @Override
-                            public void changed(ChangeEvent event, Actor actor) {
-                                if (game.getConnectivityChecker().checkConnectivity(stage)) {
-                                    Group overlay = game.getOverlayManager().showOverlay(stage);
-
-                                    LocalUser.LocalProgress progress = game.getLocalUser().getProgress().get(adventure.getUid());
-                                    if (progress != null) {
-                                        if (choice.getModifierLife() != null) {
-                                            progress.setCurrentLives(progress.getCurrentLives() + choice.getModifierLife());
-                                        }
-                                        if (choice.getModifierHero() != null) {
-                                            progress.setCurrentHero(progress.getCurrentHero() + choice.getModifierHero());
-                                        }
-                                        if (choice.getModifierCoward() != null) {
-                                            progress.setCurrentCoward(progress.getCurrentCoward() + choice.getModifierCoward());
-                                        }
-                                        if (choice.getModifierKiller() != null) {
-                                            progress.setCurrentKiller(progress.getCurrentKiller() + choice.getModifierKiller());
-                                        }
-                                        // Actualizar currentNode con nextNodeId antes de guardar
-                                        progress.setCurrentNode(choice.getNextNodeId());
-                                    }
-
-                                    game.getDataManager().saveUserData(
-                                        game.getLocalUser(),
-                                        () -> {
-                                            Gdx.app.log("AdventureScreen", "Usuario guardado en Firestore tras elegir opción");
-                                            loadNode(choice.getNextNodeId());
-                                        },
-                                        error -> {
-                                            Gdx.app.error("AdventureScreen", "Error al guardar usuario: " + error);
-                                            game.getOverlayManager().hideOverlay(overlay);
-                                            game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("error_message"));
-                                        }
-                                    );
-                                } else {
-                                    game.getOverlayManager().hideOverlay(game.getOverlayManager().showOverlay(stage));
-                                    game.setScreen(new HomeScreen(game));
-                                }
-                            }
-                        });
-                        newContentTable.add(choiceButton).expandX().fillX().padBottom(10f).row();
-                    }
-
-                    scrollPane.setActor(newContentTable);
-                    contentTable = newContentTable;
-                },
-                error -> {
-                    Gdx.app.error("AdventureScreen", "Error al cargar nodo: " + error);
-                    game.getOverlayManager().hideOverlay(overlay);
-                    game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("error_message"));
-                }
-            );
-        } else {
-            game.setScreen(new HomeScreen(game));
+        if (!game.getConnectivityChecker().checkConnectivityWithRedirect()) {
+            return;
         }
+
+        Group overlay = game.getOverlayManager().showLoadingOverlay(stage);
+        game.getDataManager().loadNode(
+            adventure.getUid(),
+            nodeId,
+            node -> {
+                currentNode = node;
+                Gdx.app.log("AdventureScreen", "Nodo cargado: " + nodeId);
+                game.getOverlayManager().hideOverlay(overlay);
+
+                Gdx.app.log("AdventureScreen", "Intentando cargar imagen: " + currentNode.getImage());
+                TextureRegion imageRegion = game.getResourceManager().getAtlas(adventure.getUid() + "_art").findRegion(currentNode.getImage());
+                if (imageRegion != null) {
+                    image.setDrawable(new TextureRegionDrawable(imageRegion));
+                } else {
+                    Gdx.app.error("AdventureScreen", "Imagen no encontrada para el nodo: " + currentNode.getImage());
+                    image.setDrawable(null);
+                }
+
+                if (currentNode.getMusic() != null) {
+                    game.getMusicManager().playIfDifferent(currentNode.getMusic());
+                }
+
+                Label descriptionLabel = new Label(currentNode.getText(), game.getSkin(), "roleplay_narrative_light_grey");
+                descriptionLabel.setFontScale(1.1f);
+                descriptionLabel.setWrap(true);
+                descriptionLabel.setAlignment(Align.center);
+
+                Table newContentTable = new Table();
+                newContentTable.add(descriptionLabel).expandX().fillX().padBottom(40f).row();
+
+                for (LocalNode.LocalChoice choice : currentNode.getChoices()) {
+                    TextButton choiceButton = uiElementFactory.createDefaultButton(choice.getText());
+                    choiceButton.addListener(new ChangeListener() {
+                        @Override
+                        public void changed(ChangeEvent event, Actor actor) {
+                            if (game.getConnectivityChecker().checkConnectivity(stage)) {
+                                Group overlay = game.getOverlayManager().showLoadingOverlay(stage);
+
+                                LocalUser.LocalProgress progress = game.getLocalUser().getProgress().get(adventure.getUid());
+                                if (progress != null) {
+                                    if (choice.getModifierLife() != null) {
+                                        progress.setCurrentLives(progress.getCurrentLives() + choice.getModifierLife());
+                                    }
+                                    if (choice.getModifierHero() != null) {
+                                        progress.setCurrentHero(progress.getCurrentHero() + choice.getModifierHero());
+                                    }
+                                    if (choice.getModifierCoward() != null) {
+                                        progress.setCurrentCoward(progress.getCurrentCoward() + choice.getModifierCoward());
+                                    }
+                                    if (choice.getModifierKiller() != null) {
+                                        progress.setCurrentKiller(progress.getCurrentKiller() + choice.getModifierKiller());
+                                    }
+                                    // Actualizar currentNode con nextNodeId antes de guardar
+                                    progress.setCurrentNode(choice.getNextNodeId());
+                                }
+
+                                game.getDataManager().saveUserData(
+                                    game.getLocalUser(),
+                                    () -> {
+                                        Gdx.app.log("AdventureScreen", "Usuario guardado en Firestore tras elegir opción");
+                                        loadNode(choice.getNextNodeId());
+                                    },
+                                    error -> {
+                                        Gdx.app.error("AdventureScreen", "Error al guardar usuario: " + error);
+                                        game.getOverlayManager().hideOverlay(overlay);
+                                        game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("error_message"));
+                                    }
+                                );
+                            }
+                        }
+                    });
+                    newContentTable.add(choiceButton).expandX().fillX().padBottom(10f).row();
+                }
+
+                scrollPane.setActor(newContentTable);
+                contentTable = newContentTable;
+            },
+            error -> {
+                Gdx.app.error("AdventureScreen", "Error al cargar nodo: " + error);
+                game.getOverlayManager().hideOverlay(overlay);
+                game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("error_message"));
+            }
+        );
     }
 
     @Override
-    public void show() {}
+    public void show() {
+        loadNode(initialNodeId);
+    }
 
     @Override
     public void render(float delta) {

@@ -1,23 +1,30 @@
 package com.alejandroacg.choicebound.utils;
 
+import com.alejandroacg.choicebound.ChoiceboundGame;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.alejandroacg.choicebound.interfaces.PlatformBridge;
-import com.alejandroacg.choicebound.ui.OverlayManager;
+import com.alejandroacg.choicebound.screens.HomeScreen;
 
 public class ConnectivityChecker {
-    private final PlatformBridge platformBridge;
-    private final OverlayManager overlayManager;
+    private final ChoiceboundGame game;
 
-    public ConnectivityChecker(PlatformBridge platformBridge, OverlayManager overlayManager) {
-        this.platformBridge = platformBridge;
-        this.overlayManager = overlayManager;
+    public ConnectivityChecker(ChoiceboundGame game) {
+        this.game = game;
     }
 
     public boolean checkConnectivity(Stage stage) {
-        boolean isConnected = platformBridge.hasInternetConnection();
+        boolean isConnected = game.getPlatformBridge().hasInternetConnection();
         if (!isConnected) {
-            overlayManager.showMessageOverlay(stage, GameConfig.getString("no_internet_connection"));
+            game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("no_internet_connection"));
         }
+        return isConnected;
+    }
+
+    public boolean checkConnectivityWithRedirect() {
+        boolean isConnected = game.getPlatformBridge().hasInternetConnection();
+        if (!isConnected) {
+            game.setScreen(new HomeScreen(game));
+        }
+
         return isConnected;
     }
 }

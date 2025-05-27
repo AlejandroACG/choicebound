@@ -43,6 +43,16 @@ public class OverlayManager {
         background.setSize(stage.getWidth(), stage.getHeight());
         overlayGroup.addActor(background);
 
+        stage.addActor(overlayGroup);
+
+        pixmap.dispose();
+
+        return overlayGroup;
+    }
+
+    public Group showLoadingOverlay(Stage stage) {
+        Group overlayGroup = showOverlay(stage);
+
         // Añadir círculo giratorio en el centro
         TextureRegionDrawable loadingCircleDrawable = new TextureRegionDrawable(
             game.getResourceManager().getAtlas("ui_pre_loaded").findRegion("loading_circle"));
@@ -55,10 +65,6 @@ public class OverlayManager {
         loadingCircle.setOrigin(Align.center);
         loadingCircle.addAction(Actions.forever(Actions.rotateBy(360, 1)));
         overlayGroup.addActor(loadingCircle);
-
-        stage.addActor(overlayGroup);
-
-        pixmap.dispose();
 
         return overlayGroup;
     }

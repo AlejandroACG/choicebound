@@ -78,7 +78,7 @@ public class SplashScreen implements Screen {
             public void changed(ChangeEvent event, Actor actor) {
                 Gdx.app.log("SplashScreen", "Botón pulsado, iniciando One Tap Sign-In");
                 if (game.getConnectivityChecker().checkConnectivity(stage)) {
-                    currentOverlay = game.getOverlayManager().showOverlay(stage);
+                    currentOverlay = game.getOverlayManager().showLoadingOverlay(stage);
                     game.getPlatformBridge().startOneTapSignIn();
                 }
             }
@@ -149,7 +149,7 @@ public class SplashScreen implements Screen {
                 lastFrame = introAnimation.getKeyFrame(introAnimation.getAnimationDuration());
 
                 createGoogleButton();
-                currentOverlay = game.getOverlayManager().showOverlay(stage);
+                currentOverlay = game.getOverlayManager().showLoadingOverlay(stage);
                 String uid = game.getPlatformBridge().getCurrentUserId();
 
                 // Verificar conectividad antes de autenticación
