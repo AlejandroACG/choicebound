@@ -15,6 +15,9 @@ import com.alejandroacg.choicebound.ChoiceboundGame;
 import com.alejandroacg.choicebound.ui.UIElementFactory;
 import com.alejandroacg.choicebound.utils.GameConfig;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class SignUpScreen implements Screen {
     private final ChoiceboundGame game;
     private final Stage stage;
@@ -39,42 +42,34 @@ public class SignUpScreen implements Screen {
 
     private void setupUI() {
         table.setFillParent(true);
-        table.align(Align.top); // Alinear el contenido del Table en la parte superior
+        table.align(Align.top);
         stage.addActor(table);
 
-        // Calcular el padding superior para mover los elementos al 75% de la altura
         float screenWidth = Gdx.graphics.getWidth();
         float screenHeight = Gdx.graphics.getHeight();
-        float padTop = screenHeight * 0.25f; // 25% de la altura desde la parte superior (para centrar al 75%)
+        float padTop = screenHeight * 0.25f;
         float titleScale = 3.0f;
         float labelScale = 2.0f;
 
-        // Añadir espacio superior para mover los elementos hacia abajo
         paddingTopCell = table.add().height(padTop);
         table.row();
 
-        // Título "Sign Up" con escala duplicada
         Label titleLabel = uiElementFactory.createTitleLabel(GameConfig.getString("sign_up"));
         titleLabel.setFontScale(titleScale);
         table.add(titleLabel).expandX().center().padBottom(60).row();
 
-        // Etiqueta "Username" en negrita con escala duplicada
         Label usernameLabel = uiElementFactory.createBoldTitleLabel(GameConfig.getString("username_label"));
         usernameLabel.setFontScale(labelScale);
         table.add(usernameLabel).expandX().center().padBottom(60).row();
 
-        // Campo de entrada para el nombre de usuario
         usernameField = uiElementFactory.createTextField();
 
-        // Añadir un filtro para limitar la longitud del texto
         usernameField.setTextFieldFilter(new TextField.TextFieldFilter() {
             @Override
             public boolean acceptChar(TextField textField, char c) {
-                // Permitir el carácter solo si la longitud actual del texto es menor que el máximo
                 if (textField.getText().length() >= MAX_USERNAME_LENGTH) {
                     return false;
                 }
-
                 return Character.isLetterOrDigit(c) || c == '-' || c == '_';
             }
         });
@@ -83,7 +78,6 @@ public class SignUpScreen implements Screen {
 
         table.add(usernameField).width(screenWidth * 0.6f).height(screenHeight * 0.05f).padBottom(screenHeight * 0.05f).row();
 
-        // Botón de registro
         TextButton registerButton = uiElementFactory.createDefaultButton(GameConfig.getString("sign_up_button"));
         registerButton.addListener(new ChangeListener() {
             @Override
@@ -95,7 +89,23 @@ public class SignUpScreen implements Screen {
                     if (game.getConnectivityChecker().checkConnectivity(stage)) {
                         if (!username.isEmpty()) {
                             Gdx.app.log("SignUpScreen", "Registro con username: " + username);
-                            LocalUser potentialUser = new LocalUser(username, uid, GameConfig.getCurrentLanguage());
+                            // Inicializar el progreso para adventure0
+                            Map<String, LocalUser.LocalProgress> progressMap = new HashMap<>();
+                            progressMap.put("adventure0", new LocalUser.LocalProgress(
+                                "adventure0",
+                                true,
+                                null,
+                                0,
+                                0,
+                                0,
+                                0
+                            ));
+                            LocalUser potentialUser = new LocalUser(
+                                username,
+                                uid,
+                                GameConfig.getCurrentLanguage(),
+                                progressMap
+                            );
                             game.getDataManager().saveUserData(
                                 potentialUser,
                                 () -> onSignUpSuccess(),
@@ -116,8 +126,22 @@ public class SignUpScreen implements Screen {
 
     private void onSignUpSuccess() {
         Gdx.app.log("SignUpScreen", "Registro exitoso, redirigiendo a HomeScreen");
-        game.setLocalUser(new LocalUser(usernameField.getText(),
-            game.getPlatformBridge().getCurrentUserId(), GameConfig.getCurrentLanguage()));
+        Map<String, LocalUser.LocalProgress> progressMap = new HashMap<>();
+        progressMap.put("adventure0", new LocalUser.LocalProgress(
+            "adventure0",
+            true,
+            null,
+            0,
+            0,
+            0,
+            0
+        ));
+        game.setLocalUser(new LocalUser(
+            usernameField.getText(),
+            game.getPlatformBridge().getCurrentUserId(),
+            GameConfig.getCurrentLanguage(),
+            progressMap
+        ));
         Gdx.input.setOnscreenKeyboardVisible(false);
         Gdx.app.postRunnable(() -> game.setScreen(new HomeScreen(game)));
     }
@@ -144,8 +168,8 @@ public class SignUpScreen implements Screen {
             float newPadTop = screenHeight * 0.25f - keyboardHeight;
             if (newPadTop < 0) newPadTop = 0;
 
-            paddingTopCell.height(newPadTop); // Uso correcto de la celda del padding
-            table.invalidate(); // Forzamos recalculo del layout
+            paddingTopCell.height(newPadTop);
+            table.invalidate();
 
             lastKeyboardHeight = keyboardHeight;
         }

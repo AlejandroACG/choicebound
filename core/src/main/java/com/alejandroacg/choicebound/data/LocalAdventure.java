@@ -9,7 +9,10 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class LocalAdventure {
     private String uid;
-    private boolean acquired;
     private String title;
     private String cover;
+    private int initialHero;
+    private int initialCoward;
+    private int initialKiller;
+    private int initialLives;
 }

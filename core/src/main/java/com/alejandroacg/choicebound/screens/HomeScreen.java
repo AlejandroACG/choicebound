@@ -2,6 +2,7 @@ package com.alejandroacg.choicebound.screens;
 
 import com.alejandroacg.choicebound.ChoiceboundGame;
 import com.alejandroacg.choicebound.data.LocalAdventure;
+import com.alejandroacg.choicebound.data.LocalUser;
 import com.alejandroacg.choicebound.ui.UIElementFactory;
 import com.alejandroacg.choicebound.utils.GameConfig;
 import com.badlogic.gdx.Gdx;
@@ -20,6 +21,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static com.alejandroacg.choicebound.utils.GameConfig.HEADER_HEIGHT_RATIO;
 
@@ -145,10 +147,18 @@ public class HomeScreen implements Screen {
                     for (int i = 0; i < adventures.size(); i++) {
                         LocalAdventure adventure = adventures.get(i);
 
+                        // Determinar si la aventura está desbloqueada para el usuario
+                        boolean isUnlocked = false;
+                        Map<String, LocalUser.LocalProgress> userProgress = game.getLocalUser().getProgress();
+                        if (userProgress != null && userProgress.containsKey(adventure.getUid())) {
+                            LocalUser.LocalProgress progress = userProgress.get(adventure.getUid());
+                            isUnlocked = progress.isUnlocked();
+                        }
+
                         // Determinar la imagen a mostrar
-                        String coverKey = adventure.isAcquired() ? adventure.getCover() : adventure.getCover() + "_locked";
+                        String coverKey = isUnlocked ? adventure.getCover() : adventure.getCover() + "_locked";
                         Gdx.app.log("Adventure", "Intentando cargar la textura: " + coverKey);
-                        TextureRegion coverRegion = game.getResourceManager().getAtlas("art").findRegion(coverKey);
+                        TextureRegion coverRegion = game.getResourceManager().getAtlas("covers").findRegion(coverKey);
                         Image coverImage = new Image(coverRegion);
                         coverImage.setScaling(Scaling.fit);
                         coverImage.setAlign(Align.center);
@@ -185,14 +195,14 @@ public class HomeScreen implements Screen {
 
                         // Crear una tabla para el contenido de la aventura
                         Table adventureTable = new Table();
-                        adventureTable.add(coverImage).center().padBottom(-120f).row();
+                        adventureTable.add(coverImage).center().row();
                         adventureTable.add(titleLabel).expandX().fillX().padBottom(10f).row();
                         adventureTable.add(buttonsTable).center();
 
                         // Envolver la tabla en un contenedor con fondo pergamino
                         Container<Table> wrappedAdventure = new Container<>(adventureTable);
                         wrappedAdventure.setBackground(new TextureRegionDrawable(game.getResourceManager().getAtlas("ui").findRegion("container_parchment")));
-                        wrappedAdventure.padTop(30f).padBottom(200f).padLeft(50f).padRight(50f);
+                        wrappedAdventure.padTop(150f).padBottom(150f).padLeft(50f).padRight(50f);
 
                         // Añadir el contenedor al contenido del scroll
                         scrollContent.add(wrappedAdventure).width(Gdx.graphics.getWidth() * 0.9f).pad(20f).row();

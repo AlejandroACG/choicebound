@@ -22,7 +22,7 @@ public class ResourceManager {
     // Carga los assets necesarios para el resto del juego
     public void loadGameAssets() {
         manager.load("textures/ui.atlas", TextureAtlas.class);
-        manager.load("textures/art.atlas", TextureAtlas.class);
+        manager.load("textures/covers.atlas", TextureAtlas.class);
         manager.load("music/main_menu.mp3", Music.class);
         manager.load("music/adventure_0_main.mp3", Music.class);
         manager.load("sounds/ui_click.wav", Sound.class);
