@@ -173,6 +173,10 @@ public class HomeScreen implements Screen {
                         TextButton newAdventureButton = uiElementFactory.createDefaultButton(GameConfig.getString("new_adventure"));
                         TextButton continueAdventureButton = uiElementFactory.createDefaultButton(GameConfig.getString("continue_adventure"));
 
+                        // Deshabilitar botones si la aventura está bloqueada
+                        newAdventureButton.setDisabled(!isUnlocked);
+                        continueAdventureButton.setDisabled(!isUnlocked);
+
                         // Añadir listeners a los botones según sea necesario
                         newAdventureButton.addListener(new ChangeListener() {
                             @Override

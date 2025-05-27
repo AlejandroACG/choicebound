@@ -8,8 +8,8 @@ public interface DatabaseInterface {
     void readUserData(String uid, Consumer<UserDTO> onSuccess, Consumer<String> onError);
     void doesUserExist(String uid, Consumer<Boolean> onSuccess, Consumer<String> onError);
     void deleteUserData(String uid, Consumer<Void> onSuccess, Consumer<String> onError);
-    void saveUserProgress(String uid, String adventureId, ProgressDTO progressDTO, Consumer<Void> onSuccess, Consumer<String> onError); // Nuevo método
-    void readUserProgress(String uid, Consumer<List<Map.Entry<String, ProgressDTO>>> onSuccess, Consumer<String> onError); // Nuevo método
+    void saveUserProgress(String uid, String adventureId, ProgressDTO progressDTO, Consumer<Void> onSuccess, Consumer<String> onError);
+    void readUserProgress(String uid, Consumer<List<Map.Entry<String, ProgressDTO>>> onSuccess, Consumer<String> onError);
     void readAllAdventures(Consumer<List<Map.Entry<String, AdventureDTO>>> onSuccess, Consumer<String> onError);
     void readAdventure(String adventureId, Consumer<AdventureDTO> onSuccess, Consumer<String> onError);
     void readNode(String adventureId, String nodeId, Consumer<NodeDTO> onSuccess, Consumer<String> onError);
@@ -70,12 +70,14 @@ public interface DatabaseInterface {
         public String text_en;
         public String text_es;
         public String image;
+        public String music; // Nuevo atributo
 
         public NodeDTO() {}
-        public NodeDTO(String text_en, String text_es, String image) {
+        public NodeDTO(String text_en, String text_es, String image, String music) {
             this.text_en = text_en;
             this.text_es = text_es;
             this.image = image;
+            this.music = music;
         }
     }
 

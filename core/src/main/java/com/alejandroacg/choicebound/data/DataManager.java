@@ -25,14 +25,12 @@ public class DataManager {
             game.getDatabase().readUserData(
                 uid,
                 userDTO -> {
-                    // Cargar los datos básicos del usuario
                     game.getLocalUser().setUsername(userDTO.username);
                     game.getLocalUser().setUid(uid);
                     game.getLocalUser().setPrefLanguage(userDTO.pref_language);
                     GameConfig.setCurrentLanguage(userDTO.pref_language);
                     Gdx.app.log("UserDataManager", "Datos de usuario cargados desde Firestore: " + userDTO.username);
 
-                    // Cargar la subcolección Progress
                     game.getDatabase().readUserProgress(
                         uid,
                         progressEntries -> {
@@ -90,7 +88,6 @@ public class DataManager {
             uid,
             userDTO,
             success -> {
-                // Guardar la subcolección Progress
                 Map<String, LocalUser.LocalProgress> progressMap = localUser.getProgress();
                 if (progressMap != null && !progressMap.isEmpty()) {
                     int[] count = {0};
@@ -263,6 +260,7 @@ public class DataManager {
                             adventureId,
                             narrativeText,
                             nodeDTO.image,
+                            nodeDTO.music, // Nuevo campo
                             choices
                         );
 

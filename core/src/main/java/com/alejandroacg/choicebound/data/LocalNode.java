@@ -14,6 +14,7 @@ public class LocalNode {
     private String adventureId;
     private String text;
     private String image;
+    private String music;
     private List<LocalChoice> choices;
 
     @Data
