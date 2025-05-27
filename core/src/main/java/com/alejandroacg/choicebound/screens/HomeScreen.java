@@ -1,20 +1,25 @@
 package com.alejandroacg.choicebound.screens;
 
+import com.alejandroacg.choicebound.ChoiceboundGame;
+import com.alejandroacg.choicebound.data.LocalAdventure;
+import com.alejandroacg.choicebound.ui.UIElementFactory;
+import com.alejandroacg.choicebound.utils.GameConfig;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.alejandroacg.choicebound.ChoiceboundGame;
-import com.alejandroacg.choicebound.ui.UIElementFactory;
-import com.alejandroacg.choicebound.utils.GameConfig;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.alejandroacg.choicebound.utils.GameConfig.HEADER_HEIGHT_RATIO;
 
@@ -23,11 +28,14 @@ public class HomeScreen implements Screen {
     private final Stage stage;
     private final UIElementFactory uiElementFactory;
     private final Color backgroundColor;
+    private List<LocalAdventure> adventures;
+    private Table scrollContent;
 
     public HomeScreen(ChoiceboundGame game) {
         this.game = game;
         this.stage = new Stage(new ScreenViewport());
         this.uiElementFactory = new UIElementFactory(game.getResourceManager(), game.getSkin());
+        this.adventures = new ArrayList<>();
         Gdx.input.setInputProcessor(stage);
 
         this.backgroundColor = game.getSkin().getColor("parchment_light");
@@ -37,17 +45,15 @@ public class HomeScreen implements Screen {
     private void setupUI() {
         Table mainTable = new Table();
         mainTable.setFillParent(true);
-        mainTable.top();
         stage.addActor(mainTable);
 
         float screenHeight = Gdx.graphics.getHeight();
         float titleScale = 3f;
         float subtitleScale = 2f;
 
-        // Crear el header con fondo y altura fija
+        // Header
         Table header = uiElementFactory.createHeader();
 
-        // Crear y configurar los elementos del header
         Label titleLabel = uiElementFactory.createTitleLabel(GameConfig.getString("title_choicebound"));
         titleLabel.setFontScale(titleScale);
         titleLabel.setAlignment(Align.center);
@@ -60,40 +66,41 @@ public class HomeScreen implements Screen {
         welcomeLabel.setFontScale(subtitleScale);
         welcomeLabel.setAlignment(Align.center);
 
+        // Botones: Store, Settings y Refresh
         TextButton storeButton = uiElementFactory.createDefaultButton(GameConfig.getString("store_button"));
         storeButton.setDisabled(true);
-        storeButton.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                Gdx.app.log("HomeScreen", "Botón Store pulsado");
-            }
-        });
 
         TextButton settingsButton = uiElementFactory.createDefaultButton(GameConfig.getString("settings"));
         settingsButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                Gdx.app.log("HomeScreen", "Botón Settings pulsado");
                 game.setScreen(new SettingsScreen(game));
             }
         });
 
-        // Subtabla horizontal para los botones
+        TextButton refreshButton = uiElementFactory.createDefaultButton(GameConfig.getString("refresh"));
+        refreshButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                game.setScreen(new HomeScreen(game));
+            }
+        });
+
+        // Tabla de botones horizontal
         Table buttonsTable = new Table();
         buttonsTable.add(storeButton).padRight(20);
-        buttonsTable.add(settingsButton);
+        buttonsTable.add(settingsButton).padRight(20);
+        buttonsTable.add(refreshButton);
 
-        // Subtabla para centrar verticalmente el contenido del header
         Table headerContent = new Table();
         headerContent.setFillParent(true);
         headerContent.top().center();
-        headerContent.add(titleLabel).padTop(20).row();
-        headerContent.add(welcomeLabel).padTop(10).row();
-        headerContent.add(buttonsTable).padTop(10);
+        headerContent.add(titleLabel).padTop(20).padBottom(-20f).row();
+        headerContent.add(welcomeLabel).row();
+        headerContent.add(buttonsTable).padTop(10).padBottom(30);
 
         header.addActor(headerContent);
 
-        // Añadir el header al layout principal
         mainTable.add(header)
             .height(screenHeight * HEADER_HEIGHT_RATIO)
             .width(Gdx.graphics.getWidth())
@@ -101,10 +108,18 @@ public class HomeScreen implements Screen {
             .fillX()
             .row();
 
-        // Área central para las diferentes campañas
-        mainTable.add().expand().row();
+        // Contenido scrolleable (solo se instancia aquí)
+        scrollContent = new Table();
+        scrollContent.top();
 
-        // Botón de Sign Out en la parte inferior
+        ScrollPane scrollPane = new ScrollPane(scrollContent);
+        scrollPane.setFadeScrollBars(false);
+        scrollPane.setScrollingDisabled(true, false);
+
+        mainTable.add(scrollPane).expand().fill().row();
+        mainTable.add().height(20).row();
+
+        // Botón de Sign Out (fuera del scroll, siempre abajo)
         TextButton signOutButton = uiElementFactory.createDefaultButton(GameConfig.getString("sign_out"));
         signOutButton.addListener(new ChangeListener() {
             @Override
@@ -112,19 +127,89 @@ public class HomeScreen implements Screen {
                 game.signOut();
             }
         });
-        mainTable.add(signOutButton).padBottom(20);
+
+        mainTable.add(signOutButton).padBottom(20).bottom();
     }
 
     @Override
     public void show() {
         game.getMusicManager().playIfDifferent("main_menu");
+
+        // Cargar las aventuras desde Firestore
+        game.getDataManager().loadAllAdventures(
+            loadedAdventures -> {
+                adventures = loadedAdventures;
+                Gdx.app.log("HomeScreen", "Aventuras cargadas: " + adventures.size());
+                Gdx.app.postRunnable(() -> {
+                    scrollContent.clear();
+                    for (int i = 0; i < adventures.size(); i++) {
+                        LocalAdventure adventure = adventures.get(i);
+
+                        // Determinar la imagen a mostrar
+                        String coverKey = adventure.isAcquired() ? adventure.getCover() : adventure.getCover() + "_locked";
+                        Gdx.app.log("Adventure", "Intentando cargar la textura: " + coverKey);
+                        TextureRegion coverRegion = game.getResourceManager().getAtlas("art").findRegion(coverKey);
+                        Image coverImage = new Image(coverRegion);
+                        coverImage.setScaling(Scaling.fit);
+                        coverImage.setAlign(Align.center);
+
+                        // Crear el título
+                        Label titleLabel = uiElementFactory.createBoldTitleLabel(adventure.getTitle());
+                        titleLabel.setAlignment(Align.center);
+                        titleLabel.setWrap(true);
+                        titleLabel.setFontScale(3f);
+
+                        // Crear los botones
+                        TextButton newAdventureButton = uiElementFactory.createDefaultButton(GameConfig.getString("new_adventure"));
+                        TextButton continueAdventureButton = uiElementFactory.createDefaultButton(GameConfig.getString("continue_adventure"));
+
+                        // Añadir listeners a los botones según sea necesario
+                        newAdventureButton.addListener(new ChangeListener() {
+                            @Override
+                            public void changed(ChangeEvent event, Actor actor) {
+                                // Lógica para nueva aventura
+                            }
+                        });
+
+                        continueAdventureButton.addListener(new ChangeListener() {
+                            @Override
+                            public void changed(ChangeEvent event, Actor actor) {
+                                // Lógica para continuar aventura
+                            }
+                        });
+
+                        // Crear una tabla para los botones
+                        Table buttonsTable = new Table();
+                        buttonsTable.add(newAdventureButton).padRight(20f);
+                        buttonsTable.add(continueAdventureButton);
+
+                        // Crear una tabla para el contenido de la aventura
+                        Table adventureTable = new Table();
+                        adventureTable.add(coverImage).center().padBottom(-120f).row();
+                        adventureTable.add(titleLabel).expandX().fillX().padBottom(10f).row();
+                        adventureTable.add(buttonsTable).center();
+
+                        // Envolver la tabla en un contenedor con fondo pergamino
+                        Container<Table> wrappedAdventure = new Container<>(adventureTable);
+                        wrappedAdventure.setBackground(new TextureRegionDrawable(game.getResourceManager().getAtlas("ui").findRegion("container_parchment")));
+                        wrappedAdventure.padTop(30f).padBottom(200f).padLeft(50f).padRight(50f);
+
+                        // Añadir el contenedor al contenido del scroll
+                        scrollContent.add(wrappedAdventure).width(Gdx.graphics.getWidth() * 0.9f).pad(20f).row();
+                    }
+                });
+            },
+            error -> {
+                Gdx.app.log("HomeScreen", "Error al cargar aventuras: " + error);
+                game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("error_message"));
+            }
+        );
     }
 
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
         stage.act(delta);
         stage.draw();
     }

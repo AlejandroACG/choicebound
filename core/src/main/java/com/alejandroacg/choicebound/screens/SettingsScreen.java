@@ -80,7 +80,7 @@ public class SettingsScreen implements Screen {
                         @Override
                         public void onConfirm() {
                             if (game.getConnectivityChecker().checkConnectivity(stage)) {
-                                game.getUserDataManager().deleteUserData(
+                                game.getDataManager().deleteUserData(
                                     () -> {
                                         Gdx.app.log("SettingsScreen", "Cuenta eliminada con éxito, redirigiendo a SplashScreen");
                                         game.signOut();
@@ -104,8 +104,19 @@ public class SettingsScreen implements Screen {
         });
         mainTable.add(deleteAccountButton).center().padBottom(20).row();
 
+        // Botón "Idiomas"
+        TextButton languagesButton = uiElementFactory.createDefaultButton(GameConfig.getString("languages"));
+        languagesButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                Gdx.app.log("SettingsScreen", "Yendo a la pantalla de idiomas.");
+                game.setScreen(new HomeScreen(game));
+            }
+        });
+        mainTable.add(languagesButton).center().padBottom(20).row();
+
         // Botón "Atrás"
-        TextButton backButton = uiElementFactory.createDefaultButton("Atrás");
+        TextButton backButton = uiElementFactory.createDefaultButton(GameConfig.getString("back"));
         backButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {

@@ -1,7 +1,7 @@
 package com.alejandroacg.choicebound;
 
 import com.alejandroacg.choicebound.data.LocalUser;
-import com.alejandroacg.choicebound.data.UserDataManager;
+import com.alejandroacg.choicebound.data.DataManager;
 import com.alejandroacg.choicebound.interfaces.DatabaseInterface;
 import com.alejandroacg.choicebound.interfaces.PlatformBridge;
 import com.alejandroacg.choicebound.resources.ResourceManager;
@@ -37,7 +37,7 @@ public class ChoiceboundGame extends Game {
     @Getter @Setter
     private LocalUser localUser;
     @Getter
-    private final UserDataManager userDataManager;
+    private final DataManager dataManager;
     @Getter
     private ConnectivityChecker connectivityChecker;
 
@@ -45,7 +45,7 @@ public class ChoiceboundGame extends Game {
         this.platformBridge = platformBridge;
         this.database = database;
         this.localUser = new LocalUser();
-        this.userDataManager = new UserDataManager(this);
+        this.dataManager = new DataManager(this);
     }
 
     @Override

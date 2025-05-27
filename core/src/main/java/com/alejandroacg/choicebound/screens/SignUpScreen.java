@@ -1,7 +1,6 @@
 package com.alejandroacg.choicebound.screens;
 
 import com.alejandroacg.choicebound.data.LocalUser;
-import com.alejandroacg.choicebound.utils.ConnectivityChecker;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
@@ -85,7 +84,7 @@ public class SignUpScreen implements Screen {
         table.add(usernameField).width(screenWidth * 0.6f).height(screenHeight * 0.05f).padBottom(screenHeight * 0.05f).row();
 
         // Botón de registro
-        TextButton registerButton = uiElementFactory.createDefaultButton(GameConfig.getString("register_button"));
+        TextButton registerButton = uiElementFactory.createDefaultButton(GameConfig.getString("sign_up_button"));
         registerButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -97,7 +96,7 @@ public class SignUpScreen implements Screen {
                         if (!username.isEmpty()) {
                             Gdx.app.log("SignUpScreen", "Registro con username: " + username);
                             LocalUser potentialUser = new LocalUser(username, uid);
-                            game.getUserDataManager().saveUserData(
+                            game.getDataManager().saveUserData(
                                 potentialUser,
                                 () -> onSignUpSuccess(),
                                 error -> onSignUpFailure(error)

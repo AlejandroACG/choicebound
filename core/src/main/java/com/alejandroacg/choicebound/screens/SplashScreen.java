@@ -93,7 +93,7 @@ public class SplashScreen implements Screen {
 
     public void onSignInSuccess() {
         Gdx.app.log("SplashScreen", "Sign In exitoso, cargando datos del usuario");
-        game.getUserDataManager().loadUserDataFromFirestore(
+        game.getDataManager().loadUserDataFromFirestore(
             () -> {
                 // Éxito: datos cargados, ahora redirigir a HomeScreen
                 Gdx.app.log("SplashScreen", "Datos cargados, cambiando a la pantalla principal");
