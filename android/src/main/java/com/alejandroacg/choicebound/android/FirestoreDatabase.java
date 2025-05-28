@@ -66,25 +66,14 @@ public class FirestoreDatabase implements DatabaseInterface {
                 for (var doc : progressSnapshots.getDocuments()) {
                     doc.getReference().delete();
                 }
-                db.collection("users").document(uid).collection("Settings")
-                    .get()
-                    .addOnSuccessListener(settingsSnapshots -> {
-                        for (var doc : settingsSnapshots.getDocuments()) {
-                            doc.getReference().delete();
-                        }
-                        db.collection("users").document(uid)
-                            .delete()
-                            .addOnSuccessListener(aVoid -> {
-                                Gdx.app.log("FirestoreDatabase", "Usuario eliminado con éxito: " + uid);
-                                onSuccess.accept(null);
-                            })
-                            .addOnFailureListener(e -> {
-                                Gdx.app.error("FirestoreDatabase", "Error al eliminar usuario: " + e.getMessage());
-                                onError.accept(e.getMessage());
-                            });
+                db.collection("users").document(uid)
+                    .delete()
+                    .addOnSuccessListener(aVoid -> {
+                        Gdx.app.log("FirestoreDatabase", "Usuario eliminado con éxito: " + uid);
+                        onSuccess.accept(null);
                     })
                     .addOnFailureListener(e -> {
-                        Gdx.app.error("FirestoreDatabase", "Error al eliminar subcolección Settings: " + e.getMessage());
+                        Gdx.app.error("FirestoreDatabase", "Error al eliminar usuario: " + e.getMessage());
                         onError.accept(e.getMessage());
                     });
             })
