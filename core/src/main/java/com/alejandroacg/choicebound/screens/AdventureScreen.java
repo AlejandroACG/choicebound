@@ -171,6 +171,7 @@ public class AdventureScreen implements Screen {
 
                 for (LocalNode.LocalChoice choice : currentNode.getChoices()) {
                     TextButton choiceButton = uiElementFactory.createDefaultButton(choice.getText());
+                    choiceButton.getLabel().setWrap(true);
                     choiceButton.addListener(new ChangeListener() {
                         @Override
                         public void changed(ChangeEvent event, Actor actor) {
@@ -207,7 +208,7 @@ public class AdventureScreen implements Screen {
                             }
                         }
                     });
-                    newContentTable.add(choiceButton).expandX().fillX().padBottom(10f).row();
+                    newContentTable.add(choiceButton).expandX().fillX().width(Gdx.graphics.getWidth() * 0.8f).padBottom(10f).row();
                 }
 
                 // Cambiar el contenido del ScrollPane de forma segura
