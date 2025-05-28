@@ -169,46 +169,95 @@ public class AdventureScreen implements Screen {
                 descriptionLabel.setAlignment(Align.center);
                 newContentTable.add(descriptionLabel).expandX().fillX().padBottom(40f).row();
 
+                LocalUser.LocalProgress progress = game.getLocalUser().getProgress().get(adventure.getUid());
                 for (LocalNode.LocalChoice choice : currentNode.getChoices()) {
-                    TextButton choiceButton = uiElementFactory.createDefaultButton(choice.getText());
-                    choiceButton.getLabel().setWrap(true);
-                    choiceButton.addListener(new ChangeListener() {
-                        @Override
-                        public void changed(ChangeEvent event, Actor actor) {
-                            if (game.getConnectivityChecker().checkConnectivity(stage)) {
-                                Group overlay = game.getOverlayManager().showLoadingOverlay(stage);
+                    // Evaluar las condiciones para decidir si mostrar el Choice
+                    boolean showChoice = true;
 
-                                LocalUser.LocalProgress progress = game.getLocalUser().getProgress().get(adventure.getUid());
-                                if (progress != null) {
-                                    if (choice.getModifierHero() != null) {
-                                        progress.setCurrentHero(progress.getCurrentHero() + choice.getModifierHero());
-                                    }
-                                    if (choice.getModifierCoward() != null) {
-                                        progress.setCurrentCoward(progress.getCurrentCoward() + choice.getModifierCoward());
-                                    }
-                                    if (choice.getModifierKiller() != null) {
-                                        progress.setCurrentKiller(progress.getCurrentKiller() + choice.getModifierKiller());
-                                    }
-                                    progress.setCurrentNode(choice.getNextNodeId());
-                                }
+                    // Condiciones numéricas
+                    if (choice.getConditionHero() != null && progress != null) {
+                        if (progress.getCurrentHero() < choice.getConditionHero()) {
+                            showChoice = false;
+                        }
+                    }
+                    if (choice.getConditionCoward() != null && progress != null) {
+                        if (progress.getCurrentCoward() < choice.getConditionCoward()) {
+                            showChoice = false;
+                        }
+                    }
+                    if (choice.getConditionKiller() != null && progress != null) {
+                        if (progress.getCurrentKiller() < choice.getConditionKiller()) {
+                            showChoice = false;
+                        }
+                    }
 
-                                game.getDataManager().saveUserData(
-                                    game.getLocalUser(),
-                                    () -> {
-                                        Gdx.app.log("AdventureScreen", "Usuario guardado en Firestore tras elegir opción");
-                                        game.getOverlayManager().hideOverlay(overlay);
-                                        loadNode(choice.getNextNodeId());
-                                    },
-                                    error -> {
-                                        Gdx.app.error("AdventureScreen", "Error al guardar usuario: " + error);
-                                        game.getOverlayManager().hideOverlay(overlay);
-                                        game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("error_message"));
-                                    }
-                                );
+                    // Condiciones de triggers positivos (todos deben estar presentes)
+                    if (choice.getConditionTriggersPositive() != null && !choice.getConditionTriggersPositive().isEmpty() && progress != null) {
+                        for (String trigger : choice.getConditionTriggersPositive()) {
+                            if (!progress.getTriggers().contains(trigger)) {
+                                showChoice = false;
+                                break;
                             }
                         }
-                    });
-                    newContentTable.add(choiceButton).expandX().fillX().width(Gdx.graphics.getWidth() * 0.8f).padBottom(10f).row();
+                    }
+
+                    // Condiciones de triggers negativos (ninguno debe estar presente)
+                    if (choice.getConditionTriggersNegative() != null && !choice.getConditionTriggersNegative().isEmpty() && progress != null) {
+                        for (String trigger : choice.getConditionTriggersNegative()) {
+                            if (progress.getTriggers().contains(trigger)) {
+                                showChoice = false;
+                                break;
+                            }
+                        }
+                    }
+
+                    // Solo generar el botón si todas las condiciones se cumplen
+                    if (showChoice) {
+                        TextButton choiceButton = uiElementFactory.createDefaultButton(choice.getText());
+                        choiceButton.getLabel().setWrap(true);
+                        choiceButton.addListener(new ChangeListener() {
+                            @Override
+                            public void changed(ChangeEvent event, Actor actor) {
+                                if (game.getConnectivityChecker().checkConnectivity(stage)) {
+                                    Group overlay = game.getOverlayManager().showLoadingOverlay(stage);
+
+                                    LocalUser.LocalProgress progress = game.getLocalUser().getProgress().get(adventure.getUid());
+                                    if (progress != null) {
+                                        // Actualizar los atributos numéricos
+                                        if (choice.getModifierHero() != null) {
+                                            progress.setCurrentHero(progress.getCurrentHero() + choice.getModifierHero());
+                                        }
+                                        if (choice.getModifierCoward() != null) {
+                                            progress.setCurrentCoward(progress.getCurrentCoward() + choice.getModifierCoward());
+                                        }
+                                        if (choice.getModifierKiller() != null) {
+                                            progress.setCurrentKiller(progress.getCurrentKiller() + choice.getModifierKiller());
+                                        }
+                                        // Añadir el triggerToSet al Set<String> de triggers si no es null
+                                        if (choice.getTriggerToSet() != null) {
+                                            progress.getTriggers().add(choice.getTriggerToSet());
+                                        }
+                                        progress.setCurrentNode(choice.getNextNodeId());
+                                    }
+
+                                    game.getDataManager().saveUserData(
+                                        game.getLocalUser(),
+                                        () -> {
+                                            Gdx.app.log("AdventureScreen", "Usuario guardado en Firestore tras elegir opción");
+                                            game.getOverlayManager().hideOverlay(overlay);
+                                            loadNode(choice.getNextNodeId());
+                                        },
+                                        error -> {
+                                            Gdx.app.error("AdventureScreen", "Error al guardar usuario: " + error);
+                                            game.getOverlayManager().hideOverlay(overlay);
+                                            game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("error_message"));
+                                        }
+                                    );
+                                }
+                            }
+                        });
+                        newContentTable.add(choiceButton).expandX().fillX().width(Gdx.graphics.getWidth() * 0.8f).padBottom(10f).row();
+                    }
                 }
 
                 // Cambiar el contenido del ScrollPane de forma segura

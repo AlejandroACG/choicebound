@@ -1,5 +1,6 @@
 package com.alejandroacg.choicebound.interfaces;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +33,7 @@ public interface DatabaseInterface {
         public int current_hero;
         public int current_coward;
         public int current_killer;
+        public List<String> triggers;
 
         public ProgressDTO() {}
         public ProgressDTO(boolean unlocked, String current_node, int current_hero, int current_coward, int current_killer) {
@@ -40,6 +42,16 @@ public interface DatabaseInterface {
             this.current_hero = current_hero;
             this.current_coward = current_coward;
             this.current_killer = current_killer;
+            this.triggers = new ArrayList<>();
+        }
+
+        public ProgressDTO(boolean unlocked, String current_node, int current_hero, int current_coward, int current_killer, List<String> triggers) {
+            this.unlocked = unlocked;
+            this.current_node = current_node;
+            this.current_hero = current_hero;
+            this.current_coward = current_coward;
+            this.current_killer = current_killer;
+            this.triggers = triggers != null ? triggers : new ArrayList<>();
         }
     }
 
@@ -66,7 +78,7 @@ public interface DatabaseInterface {
         public String text_en;
         public String text_es;
         public String image;
-        public String music; // Nuevo atributo
+        public String music;
 
         public NodeDTO() {}
         public NodeDTO(String text_en, String text_es, String image, String music) {
@@ -84,6 +96,12 @@ public interface DatabaseInterface {
         public Integer modifier_hero;
         public Integer modifier_coward;
         public Integer modifier_killer;
+        public String trigger_to_set;
+        public Integer condition_hero;
+        public Integer condition_coward;
+        public Integer condition_killer;
+        public List<String> condition_triggers_positive; // Renombrado para consistencia
+        public List<String> condition_triggers_negative; // Renombrado para consistencia
 
         public ChoiceDTO() {}
         public ChoiceDTO(String text_en, String text_es, String next_node_id, Integer modifier_hero, Integer modifier_coward, Integer modifier_killer) {
@@ -93,6 +111,25 @@ public interface DatabaseInterface {
             this.modifier_hero = modifier_hero;
             this.modifier_coward = modifier_coward;
             this.modifier_killer = modifier_killer;
+            this.condition_triggers_positive = new ArrayList<>();
+            this.condition_triggers_negative = new ArrayList<>();
+        }
+
+        public ChoiceDTO(String text_en, String text_es, String next_node_id, Integer modifier_hero, Integer modifier_coward, Integer modifier_killer,
+                         String trigger_to_set, Integer condition_hero, Integer condition_coward, Integer condition_killer,
+                         List<String> condition_triggers_positive, List<String> condition_triggers_negative) {
+            this.text_en = text_en;
+            this.text_es = text_es;
+            this.next_node_id = next_node_id;
+            this.modifier_hero = modifier_hero;
+            this.modifier_coward = modifier_coward;
+            this.modifier_killer = modifier_killer;
+            this.trigger_to_set = trigger_to_set;
+            this.condition_hero = condition_hero;
+            this.condition_coward = condition_coward;
+            this.condition_killer = condition_killer;
+            this.condition_triggers_positive = condition_triggers_positive != null ? condition_triggers_positive : new ArrayList<>();
+            this.condition_triggers_negative = condition_triggers_negative != null ? condition_triggers_negative : new ArrayList<>();
         }
     }
 

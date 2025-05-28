@@ -6,10 +6,7 @@ import com.alejandroacg.choicebound.utils.GameConfig;
 import com.badlogic.gdx.Gdx;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DataManager {
     private final ChoiceboundGame game;
@@ -46,6 +43,7 @@ public class DataManager {
                                     progressDTO.current_coward,
                                     progressDTO.current_killer
                                 );
+                                progress.setTriggers(new HashSet<>(progressDTO.triggers));
                                 progressMap.put(adventureId, progress);
                             }
                             game.getLocalUser().setProgress(progressMap);
@@ -99,7 +97,8 @@ public class DataManager {
                             progress.getCurrentNode(),
                             progress.getCurrentHero(),
                             progress.getCurrentCoward(),
-                            progress.getCurrentKiller()
+                            progress.getCurrentKiller(),
+                            new ArrayList<>(progress.getTriggers())
                         );
                         game.getDatabase().saveUserProgress(
                             uid,
@@ -239,13 +238,18 @@ public class DataManager {
                         List<LocalNode.LocalChoice> choices = new ArrayList<>();
                         for (DatabaseInterface.ChoiceDTO choiceDTO : choicesDTO) {
                             String choiceText = GameConfig.getCurrentLanguage().equals("es") ? choiceDTO.text_es : choiceDTO.text_en;
-                            LocalNode.LocalChoice choice = new LocalNode.LocalChoice(
-                                choiceText,
-                                choiceDTO.next_node_id,
-                                choiceDTO.modifier_hero,
-                                choiceDTO.modifier_coward,
-                                choiceDTO.modifier_killer
-                            );
+                            LocalNode.LocalChoice choice = new LocalNode.LocalChoice();
+                            choice.setText(choiceText);
+                            choice.setNextNodeId(choiceDTO.next_node_id);
+                            choice.setModifierHero(choiceDTO.modifier_hero);
+                            choice.setModifierCoward(choiceDTO.modifier_coward);
+                            choice.setModifierKiller(choiceDTO.modifier_killer);
+                            choice.setTriggerToSet(choiceDTO.trigger_to_set);
+                            choice.setConditionHero(choiceDTO.condition_hero);
+                            choice.setConditionCoward(choiceDTO.condition_coward);
+                            choice.setConditionKiller(choiceDTO.condition_killer);
+                            choice.setConditionTriggersPositive(choiceDTO.condition_triggers_positive);
+                            choice.setConditionTriggersNegative(choiceDTO.condition_triggers_negative);
                             choices.add(choice);
                         }
 
@@ -255,7 +259,7 @@ public class DataManager {
                             adventureId,
                             narrativeText,
                             nodeDTO.image,
-                            nodeDTO.music, // Nuevo campo
+                            nodeDTO.music,
                             choices
                         );
 

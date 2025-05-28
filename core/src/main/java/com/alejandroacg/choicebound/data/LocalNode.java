@@ -26,5 +26,11 @@ public class LocalNode {
         private Integer modifierHero;
         private Integer modifierCoward;
         private Integer modifierKiller;
+        private String triggerToSet;
+        private Integer conditionHero;
+        private Integer conditionCoward;
+        private Integer conditionKiller;
+        private List<String> conditionTriggersPositive;
+        private List<String> conditionTriggersNegative;
     }
 }
