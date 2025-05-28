@@ -30,6 +30,9 @@ public class AdventureScreen implements Screen {
     private Table contentTable;
     private ScrollPane scrollPane;
     private final String initialNodeId;
+    private Label heroLabel;
+    private Label cowardLabel;
+    private Label killerLabel;
 
     public AdventureScreen(ChoiceboundGame game, LocalAdventure adventure, String nodeId) {
         this.game = game;
@@ -62,15 +65,15 @@ public class AdventureScreen implements Screen {
 
         float labelSize = 1.4f;
 
-        Label heroLabel = new Label(GameConfig.getString("hero") + ": "  + (progress != null ? progress.getCurrentHero() : 0), game.getSkin(), "roleplay_narrative_orange");
+        heroLabel = new Label(GameConfig.getString("hero") + ": " + (progress != null ? progress.getCurrentHero() : 0), game.getSkin(), "roleplay_narrative_orange");
         heroLabel.setFontScale(labelSize);
         heroLabel.setAlignment(Align.center);
 
-        Label cowardLabel = new Label(GameConfig.getString("coward") + ": "  + (progress != null ? progress.getCurrentCoward() : 0), game.getSkin(), "roleplay_narrative_purple");
+        cowardLabel = new Label(GameConfig.getString("coward") + ": " + (progress != null ? progress.getCurrentCoward() : 0), game.getSkin(), "roleplay_narrative_purple");
         cowardLabel.setFontScale(labelSize);
         cowardLabel.setAlignment(Align.center);
 
-        Label killerLabel = new Label(GameConfig.getString("killer") + ": "  + (progress != null ? progress.getCurrentKiller() : 0), game.getSkin(), "roleplay_narrative_red");
+        killerLabel = new Label(GameConfig.getString("killer") + ": " + (progress != null ? progress.getCurrentKiller() : 0), game.getSkin(), "roleplay_narrative_red");
         killerLabel.setFontScale(labelSize);
         killerLabel.setAlignment(Align.center);
 
@@ -170,6 +173,17 @@ public class AdventureScreen implements Screen {
                 newContentTable.add(descriptionLabel).expandX().fillX().padBottom(40f).row();
 
                 LocalUser.LocalProgress progress = game.getLocalUser().getProgress().get(adventure.getUid());
+                // Actualizar los Labels con los valores actuales del progreso
+                if (progress != null) {
+                    heroLabel.setText(GameConfig.getString("hero") + ": " + progress.getCurrentHero());
+                    cowardLabel.setText(GameConfig.getString("coward") + ": " + progress.getCurrentCoward());
+                    killerLabel.setText(GameConfig.getString("killer") + ": " + progress.getCurrentKiller());
+                } else {
+                    heroLabel.setText(GameConfig.getString("hero") + ": 0");
+                    cowardLabel.setText(GameConfig.getString("coward") + ": 0");
+                    killerLabel.setText(GameConfig.getString("killer") + ": 0");
+                }
+
                 for (LocalNode.LocalChoice choice : currentNode.getChoices()) {
                     // Evaluar las condiciones para decidir si mostrar el Choice
                     boolean showChoice = true;
