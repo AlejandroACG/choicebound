@@ -22,7 +22,6 @@ public class LocalUser {
         private String adventureId;
         private boolean unlocked;
         private String currentNode;
-        private int currentLives;
         private int currentHero;
         private int currentCoward;
         private int currentKiller;

@@ -23,7 +23,6 @@ public class LocalNode {
     public static class LocalChoice {
         private String text;
         private String nextNodeId;
-        private Integer modifierLife;
         private Integer modifierHero;
         private Integer modifierCoward;
         private Integer modifierKiller;

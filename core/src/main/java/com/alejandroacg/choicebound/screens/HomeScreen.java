@@ -132,7 +132,6 @@ public class HomeScreen implements Screen {
         game.getOverlayManager().showLoadingOverlay(stage);
         LocalUser.LocalProgress progress = game.getLocalUser().getProgress().get(adventure.getUid());
         if (progress != null) {
-            progress.setCurrentLives(adventure.getInitialLives());
             progress.setCurrentHero(adventure.getInitialHero());
             progress.setCurrentCoward(adventure.getInitialCoward());
             progress.setCurrentKiller(adventure.getInitialKiller());

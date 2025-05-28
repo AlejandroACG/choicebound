@@ -97,7 +97,6 @@ public class SignUpScreen implements Screen {
                                 null,
                                 0,
                                 0,
-                                0,
                                 0
                             ));
                             LocalUser potentialUser = new LocalUser(
@@ -131,7 +130,6 @@ public class SignUpScreen implements Screen {
             "adventure0",
             true,
             null,
-            0,
             0,
             0,
             0

@@ -29,7 +29,7 @@ public class AdventureScreen implements Screen {
     private Image image;
     private Table contentTable;
     private ScrollPane scrollPane;
-    private final String initialNodeId; // Guardar el nodeId para usarlo en show()
+    private final String initialNodeId;
 
     public AdventureScreen(ChoiceboundGame game, LocalAdventure adventure, String nodeId) {
         this.game = game;
@@ -62,10 +62,6 @@ public class AdventureScreen implements Screen {
 
         float labelSize = 1.4f;
 
-        Label livesLabel = new Label(GameConfig.getString("lives") + ": " + (progress != null ? progress.getCurrentLives() : 0), game.getSkin(), "roleplay_narrative_green");
-        livesLabel.setFontScale(labelSize);
-        livesLabel.setAlignment(Align.center);
-
         Label heroLabel = new Label(GameConfig.getString("hero") + ": "  + (progress != null ? progress.getCurrentHero() : 0), game.getSkin(), "roleplay_narrative_orange");
         heroLabel.setFontScale(labelSize);
         heroLabel.setAlignment(Align.center);
@@ -89,9 +85,8 @@ public class AdventureScreen implements Screen {
         });
 
         Table statsTable = new Table();
-        statsTable.add(livesLabel).padRight(20f);
-        statsTable.add(heroLabel).padRight(20f);
-        statsTable.add(cowardLabel).padRight(20f);
+        statsTable.add(heroLabel).padRight(30f);
+        statsTable.add(cowardLabel).padRight(30f);
         statsTable.add(killerLabel);
 
         Table headerContent = new Table();
@@ -112,11 +107,12 @@ public class AdventureScreen implements Screen {
             .row();
 
         image = new Image();
-        image.setScaling(Scaling.fit);
+        image.setScaling(Scaling.fillX);
         image.setAlign(Align.center);
         mainTable.add(image)
             .expandX()
             .fillX()
+            .height(screenHeight * 0.3f)
             .padTop(0)
             .padLeft(0)
             .padRight(0)
@@ -154,6 +150,8 @@ public class AdventureScreen implements Screen {
                 Gdx.app.log("AdventureScreen", "Intentando cargar imagen: " + currentNode.getImage());
                 TextureRegion imageRegion = game.getResourceManager().getAtlas(adventure.getUid() + "_art").findRegion(currentNode.getImage());
                 if (imageRegion != null) {
+                    Gdx.app.log("AdventureScreen", "Imagen cargada correctamente: " + currentNode.getImage());
+                    Gdx.app.log("AdventureScreen", "Dimensiones de la región: " + imageRegion.getRegionWidth() + "x" + imageRegion.getRegionHeight());
                     image.setDrawable(new TextureRegionDrawable(imageRegion));
                 } else {
                     Gdx.app.error("AdventureScreen", "Imagen no encontrada para el nodo: " + currentNode.getImage());
@@ -164,12 +162,11 @@ public class AdventureScreen implements Screen {
                     game.getMusicManager().playIfDifferent(currentNode.getMusic());
                 }
 
+                Table newContentTable = new Table();
                 Label descriptionLabel = new Label(currentNode.getText(), game.getSkin(), "roleplay_narrative_light_grey");
                 descriptionLabel.setFontScale(1.1f);
                 descriptionLabel.setWrap(true);
                 descriptionLabel.setAlignment(Align.center);
-
-                Table newContentTable = new Table();
                 newContentTable.add(descriptionLabel).expandX().fillX().padBottom(40f).row();
 
                 for (LocalNode.LocalChoice choice : currentNode.getChoices()) {
@@ -182,9 +179,6 @@ public class AdventureScreen implements Screen {
 
                                 LocalUser.LocalProgress progress = game.getLocalUser().getProgress().get(adventure.getUid());
                                 if (progress != null) {
-                                    if (choice.getModifierLife() != null) {
-                                        progress.setCurrentLives(progress.getCurrentLives() + choice.getModifierLife());
-                                    }
                                     if (choice.getModifierHero() != null) {
                                         progress.setCurrentHero(progress.getCurrentHero() + choice.getModifierHero());
                                     }
@@ -194,7 +188,6 @@ public class AdventureScreen implements Screen {
                                     if (choice.getModifierKiller() != null) {
                                         progress.setCurrentKiller(progress.getCurrentKiller() + choice.getModifierKiller());
                                     }
-                                    // Actualizar currentNode con nextNodeId antes de guardar
                                     progress.setCurrentNode(choice.getNextNodeId());
                                 }
 
@@ -202,6 +195,7 @@ public class AdventureScreen implements Screen {
                                     game.getLocalUser(),
                                     () -> {
                                         Gdx.app.log("AdventureScreen", "Usuario guardado en Firestore tras elegir opción");
+                                        game.getOverlayManager().hideOverlay(overlay);
                                         loadNode(choice.getNextNodeId());
                                     },
                                     error -> {
@@ -216,8 +210,11 @@ public class AdventureScreen implements Screen {
                     newContentTable.add(choiceButton).expandX().fillX().padBottom(10f).row();
                 }
 
-                scrollPane.setActor(newContentTable);
-                contentTable = newContentTable;
+                // Cambiar el contenido del ScrollPane de forma segura
+                Gdx.app.postRunnable(() -> {
+                    scrollPane.setActor(newContentTable);
+                    contentTable = newContentTable;
+                });
             },
             error -> {
                 Gdx.app.error("AdventureScreen", "Error al cargar nodo: " + error);

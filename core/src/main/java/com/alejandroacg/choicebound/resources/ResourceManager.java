@@ -28,6 +28,7 @@ public class ResourceManager {
         manager.load("textures/covers.atlas", TextureAtlas.class);
         manager.load("music/main_menu.mp3", Music.class);
         manager.load("music/adventure0_main.mp3", Music.class);
+        manager.load("music/adventure0_death.mp3", Music.class);
         manager.load("sounds/ui_click.wav", Sound.class);
     }
 
@@ -35,12 +36,9 @@ public class ResourceManager {
         String atlasPath = "textures/" + adventure + "_art.atlas";
         if (!manager.isLoaded(atlasPath)) {
             manager.load(atlasPath, TextureAtlas.class);
-            asyncExecutor.submit((AsyncTask<Void>) () -> {
-                while (!manager.isLoaded(atlasPath)) {
-                    manager.update();
-                }
-                Gdx.app.postRunnable(onComplete);
-                return null;
+            Gdx.app.postRunnable(() -> {
+                manager.finishLoadingAsset(atlasPath);
+                onComplete.run();
             });
         } else {
             Gdx.app.postRunnable(onComplete);

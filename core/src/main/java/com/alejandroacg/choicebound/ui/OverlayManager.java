@@ -63,7 +63,7 @@ public class OverlayManager {
             (stage.getHeight() - loadingCircle.getHeight()) / 2
         );
         loadingCircle.setOrigin(Align.center);
-        loadingCircle.addAction(Actions.forever(Actions.rotateBy(360, 1)));
+        loadingCircle.addAction(Actions.forever(Actions.rotateBy(-360, 1)));
         overlayGroup.addActor(loadingCircle);
 
         return overlayGroup;

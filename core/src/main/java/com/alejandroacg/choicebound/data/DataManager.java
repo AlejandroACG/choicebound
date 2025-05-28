@@ -42,7 +42,6 @@ public class DataManager {
                                     adventureId,
                                     progressDTO.unlocked,
                                     progressDTO.current_node,
-                                    progressDTO.current_lives,
                                     progressDTO.current_hero,
                                     progressDTO.current_coward,
                                     progressDTO.current_killer
@@ -98,7 +97,6 @@ public class DataManager {
                         DatabaseInterface.ProgressDTO progressDTO = new DatabaseInterface.ProgressDTO(
                             progress.isUnlocked(),
                             progress.getCurrentNode(),
-                            progress.getCurrentLives(),
                             progress.getCurrentHero(),
                             progress.getCurrentCoward(),
                             progress.getCurrentKiller()
@@ -180,8 +178,7 @@ public class DataManager {
                         dto.cover,
                         dto.initial_hero,
                         dto.initial_coward,
-                        dto.initial_killer,
-                        dto.initial_lives
+                        dto.initial_killer
                     );
                     adventures.add(adventure);
                 }
@@ -218,8 +215,7 @@ public class DataManager {
                     adventureDTO.cover,
                     adventureDTO.initial_hero,
                     adventureDTO.initial_coward,
-                    adventureDTO.initial_killer,
-                    adventureDTO.initial_lives
+                    adventureDTO.initial_killer
                 );
                 Gdx.app.log("DataManager", "Aventura cargada con éxito: " + adventureId);
                 onSuccess.accept(adventure);
@@ -246,7 +242,6 @@ public class DataManager {
                             LocalNode.LocalChoice choice = new LocalNode.LocalChoice(
                                 choiceText,
                                 choiceDTO.next_node_id,
-                                choiceDTO.modifier_life,
                                 choiceDTO.modifier_hero,
                                 choiceDTO.modifier_coward,
                                 choiceDTO.modifier_killer

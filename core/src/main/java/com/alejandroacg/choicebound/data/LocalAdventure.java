@@ -14,5 +14,4 @@ public class LocalAdventure {
     private int initialHero;
     private int initialCoward;
     private int initialKiller;
-    private int initialLives;
 }
