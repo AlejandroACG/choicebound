@@ -28,7 +28,6 @@ public class SplashScreen implements Screen {
     private TextureRegion lastFrame;
     private Container<Table> buttonContainer;
     private UIElementFactory uiElementFactory;
-    private Group currentOverlay;
 
     public SplashScreen(ChoiceboundGame game) {
         this.game = game;
@@ -78,7 +77,7 @@ public class SplashScreen implements Screen {
             public void changed(ChangeEvent event, Actor actor) {
                 Gdx.app.log("SplashScreen", "Botón pulsado, iniciando One Tap Sign-In");
                 if (game.getConnectivityChecker().checkConnectivity(stage)) {
-                    currentOverlay = game.getOverlayManager().showLoadingOverlay(stage);
+                    game.getOverlayManager().showLoadingOverlay(stage);
                     game.getPlatformBridge().startOneTapSignIn();
                 }
             }
@@ -104,7 +103,7 @@ public class SplashScreen implements Screen {
                 // Error al cargar datos, ejecutar signOut
                 Gdx.app.log("SplashScreen", "Error al cargar datos del usuario: " + error);
                 game.getPlatformBridge().signOut();
-                game.getOverlayManager().hideOverlay(currentOverlay);
+                game.getOverlayManager().hideLoadingOverlay();
             }
         );
     }
@@ -119,7 +118,7 @@ public class SplashScreen implements Screen {
 
     public void onSignInFailure(String errorMessage) {
         Gdx.app.log("SplashScreen", "Fallo en el sign in: " + errorMessage);
-        game.getOverlayManager().hideOverlay(currentOverlay);
+        game.getOverlayManager().hideLoadingOverlay();
         game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("error_message"));
     }
 
@@ -149,7 +148,7 @@ public class SplashScreen implements Screen {
                 lastFrame = introAnimation.getKeyFrame(introAnimation.getAnimationDuration());
 
                 createGoogleButton();
-                currentOverlay = game.getOverlayManager().showLoadingOverlay(stage);
+                game.getOverlayManager().hideLoadingOverlay();
                 String uid = game.getPlatformBridge().getCurrentUserId();
 
                 // Verificar conectividad antes de autenticación
@@ -161,18 +160,18 @@ public class SplashScreen implements Screen {
                                 onSignInSuccess();
                             } else {
                                 game.getPlatformBridge().signOut();
-                                game.getOverlayManager().hideOverlay(currentOverlay);
+                                game.getOverlayManager().hideLoadingOverlay();
                             }
                         },
                         error -> {
                             Gdx.app.error("SplashScreen", "Error al verificar existencia de usuario: " + error);
                             game.getPlatformBridge().signOut();
-                            game.getOverlayManager().hideOverlay(currentOverlay);
+                            game.getOverlayManager().hideLoadingOverlay();
                         }
                     );
                 } else {
                     game.getPlatformBridge().signOut();
-                    game.getOverlayManager().hideOverlay(currentOverlay);
+                    game.getOverlayManager().hideLoadingOverlay();
                 }
             }
 

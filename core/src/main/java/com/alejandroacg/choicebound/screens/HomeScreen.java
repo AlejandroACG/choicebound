@@ -20,7 +20,6 @@ import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +32,10 @@ public class HomeScreen implements Screen {
     private final Color backgroundColor;
     private List<LocalAdventure> adventures;
     private Table scrollContent;
+    private boolean awaitingAtlasLoad = false;
+    private LocalAdventure pendingAdventure = null;
+    private String pendingNodeId = null;
+
 
     public HomeScreen(ChoiceboundGame game) {
         this.game = game;
@@ -131,9 +134,10 @@ public class HomeScreen implements Screen {
 
     private void startNewAdventure(LocalAdventure adventure) {
         game.getOverlayManager().showLoadingOverlay(stage);
-        game.getResourceManager().loadAdventureArt(adventure.getUid(), () -> {
-            game.setScreen(new AdventureScreen(game, adventure, "node000"));
-        });
+        game.getResourceManager().loadAdventureArt(adventure.getUid(), () -> {});
+        awaitingAtlasLoad = true;
+        pendingAdventure = adventure;
+        pendingNodeId = "node000";
     }
 
     @Override
@@ -210,9 +214,10 @@ public class HomeScreen implements Screen {
                                 public void changed(ChangeEvent event, Actor actor) {
                                     if (game.getConnectivityChecker().checkConnectivity(stage)) {
                                         game.getOverlayManager().showLoadingOverlay(stage);
-                                        game.getResourceManager().loadAdventureArt(adventure.getUid(), () -> {
-                                            game.setScreen(new AdventureScreen(game, adventure, currentNodeId));
-                                        });
+                                        game.getResourceManager().loadAdventureArt(adventure.getUid(), () -> {});
+                                        awaitingAtlasLoad = true;
+                                        pendingAdventure = adventure;
+                                        pendingNodeId = currentNodeId;
                                     }
                                 }
                             });
@@ -244,6 +249,12 @@ public class HomeScreen implements Screen {
 
     @Override
     public void render(float delta) {
+        if (awaitingAtlasLoad && game.getResourceManager().update()) {
+            awaitingAtlasLoad = false;
+            game.setScreen(new AdventureScreen(game, pendingAdventure, pendingNodeId));
+            return;
+        }
+
         Gdx.gl.glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         stage.act(delta);

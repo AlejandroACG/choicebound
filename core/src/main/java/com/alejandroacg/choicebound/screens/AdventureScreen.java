@@ -175,7 +175,7 @@ public class AdventureScreen implements Screen {
             node -> {
                 currentNode = node;
                 Gdx.app.log("AdventureScreen", "Nodo cargado: " + nodeId);
-                game.getOverlayManager().hideOverlay(overlay);
+                game.getOverlayManager().hideLoadingOverlay();
 
                 Gdx.app.log("AdventureScreen", "Intentando cargar imagen: " + currentNode.getImage());
                 TextureRegion imageRegion = game.getResourceManager().getAtlas(adventure.getUid() + "_art").findRegion(currentNode.getImage());
@@ -255,7 +255,7 @@ public class AdventureScreen implements Screen {
                             @Override
                             public void changed(ChangeEvent event, Actor actor) {
                                 if (game.getConnectivityChecker().checkConnectivity(stage)) {
-                                    Group overlay = game.getOverlayManager().showLoadingOverlay(stage);
+                                    game.getOverlayManager().showLoadingOverlay(stage);
 
                                     LocalUser.LocalProgress progress = game.getLocalUser().getProgress().get(adventure.getUid());
                                     if (progress != null) {
@@ -278,12 +278,12 @@ public class AdventureScreen implements Screen {
                                         game.getLocalUser(),
                                         () -> {
                                             Gdx.app.log("AdventureScreen", "Usuario guardado en Firestore tras elegir opción");
-                                            game.getOverlayManager().hideOverlay(overlay);
+                                            game.getOverlayManager().hideLoadingOverlay();
                                             loadNode(choice.getNextNodeId());
                                         },
                                         error -> {
                                             Gdx.app.error("AdventureScreen", "Error al guardar usuario: " + error);
-                                            game.getOverlayManager().hideOverlay(overlay);
+                                            game.getOverlayManager().hideLoadingOverlay();
                                             game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("error_message"));
                                         }
                                     );
@@ -301,7 +301,7 @@ public class AdventureScreen implements Screen {
             },
             error -> {
                 Gdx.app.error("AdventureScreen", "Error al cargar nodo: " + error);
-                game.getOverlayManager().hideOverlay(overlay);
+                game.getOverlayManager().hideLoadingOverlay();
                 game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("error_message"));
             }
         );
