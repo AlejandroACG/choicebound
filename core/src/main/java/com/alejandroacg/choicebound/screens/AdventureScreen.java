@@ -19,6 +19,8 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
+import java.util.HashSet;
+
 public class AdventureScreen implements Screen {
     private final ChoiceboundGame game;
     private final Stage stage;
@@ -141,6 +143,31 @@ public class AdventureScreen implements Screen {
             return;
         }
 
+        // Resetear el progreso y guardar si es el nodo inicial ("node000")
+        if ("node000".equals(nodeId)) {
+            LocalUser.LocalProgress progress = game.getLocalUser().getProgress().get(adventure.getUid());
+            if (progress != null) {
+                // Resetear todos los valores del progreso
+                progress.setCurrentHero(adventure.getInitialHero());
+                progress.setCurrentCoward(adventure.getInitialCoward());
+                progress.setCurrentKiller(adventure.getInitialKiller());
+                progress.setCurrentNode("node000");
+                progress.setTriggers(new HashSet<>());
+
+                // Guardar el progreso actualizado en Firestore
+                game.getDataManager().saveUserData(
+                    game.getLocalUser(),
+                    () -> {
+                        Gdx.app.log("AdventureScreen", "Usuario guardado en Firestore al iniciar nueva aventura");
+                    },
+                    error -> {
+                        Gdx.app.error("AdventureScreen", "Error al guardar usuario al iniciar aventura: " + error);
+                        game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("error_message"));
+                    }
+                );
+            }
+        }
+
         Group overlay = game.getOverlayManager().showLoadingOverlay(stage);
         game.getDataManager().loadNode(
             adventure.getUid(),
@@ -166,14 +193,14 @@ public class AdventureScreen implements Screen {
                 }
 
                 Table newContentTable = new Table();
+                newContentTable.setWidth(Gdx.graphics.getWidth() * 0.8f);
                 Label descriptionLabel = new Label(currentNode.getText(), game.getSkin(), "roleplay_narrative_light_grey");
                 descriptionLabel.setFontScale(1.1f);
                 descriptionLabel.setWrap(true);
                 descriptionLabel.setAlignment(Align.center);
-                newContentTable.add(descriptionLabel).expandX().fillX().padBottom(40f).row();
+                newContentTable.add(descriptionLabel).expandX().fillX().minHeight(100f).padBottom(40f).row();
 
                 LocalUser.LocalProgress progress = game.getLocalUser().getProgress().get(adventure.getUid());
-                // Actualizar los Labels con los valores actuales del progreso
                 if (progress != null) {
                     heroLabel.setText(GameConfig.getString("hero") + ": " + progress.getCurrentHero());
                     cowardLabel.setText(GameConfig.getString("coward") + ": " + progress.getCurrentCoward());
@@ -185,10 +212,8 @@ public class AdventureScreen implements Screen {
                 }
 
                 for (LocalNode.LocalChoice choice : currentNode.getChoices()) {
-                    // Evaluar las condiciones para decidir si mostrar el Choice
                     boolean showChoice = true;
 
-                    // Condiciones numéricas
                     if (choice.getConditionHero() != null && progress != null) {
                         if (progress.getCurrentHero() < choice.getConditionHero()) {
                             showChoice = false;
@@ -205,7 +230,6 @@ public class AdventureScreen implements Screen {
                         }
                     }
 
-                    // Condiciones de triggers positivos (todos deben estar presentes)
                     if (choice.getConditionTriggersPositive() != null && !choice.getConditionTriggersPositive().isEmpty() && progress != null) {
                         for (String trigger : choice.getConditionTriggersPositive()) {
                             if (!progress.getTriggers().contains(trigger)) {
@@ -215,7 +239,6 @@ public class AdventureScreen implements Screen {
                         }
                     }
 
-                    // Condiciones de triggers negativos (ninguno debe estar presente)
                     if (choice.getConditionTriggersNegative() != null && !choice.getConditionTriggersNegative().isEmpty() && progress != null) {
                         for (String trigger : choice.getConditionTriggersNegative()) {
                             if (progress.getTriggers().contains(trigger)) {
@@ -225,7 +248,6 @@ public class AdventureScreen implements Screen {
                         }
                     }
 
-                    // Solo generar el botón si todas las condiciones se cumplen
                     if (showChoice) {
                         TextButton choiceButton = uiElementFactory.createDefaultButton(choice.getText());
                         choiceButton.getLabel().setWrap(true);
@@ -237,7 +259,6 @@ public class AdventureScreen implements Screen {
 
                                     LocalUser.LocalProgress progress = game.getLocalUser().getProgress().get(adventure.getUid());
                                     if (progress != null) {
-                                        // Actualizar los atributos numéricos
                                         if (choice.getModifierHero() != null) {
                                             progress.setCurrentHero(progress.getCurrentHero() + choice.getModifierHero());
                                         }
@@ -247,7 +268,6 @@ public class AdventureScreen implements Screen {
                                         if (choice.getModifierKiller() != null) {
                                             progress.setCurrentKiller(progress.getCurrentKiller() + choice.getModifierKiller());
                                         }
-                                        // Añadir el triggerToSet al Set<String> de triggers si no es null
                                         if (choice.getTriggerToSet() != null) {
                                             progress.getTriggers().add(choice.getTriggerToSet());
                                         }
@@ -274,7 +294,6 @@ public class AdventureScreen implements Screen {
                     }
                 }
 
-                // Cambiar el contenido del ScrollPane de forma segura
                 Gdx.app.postRunnable(() -> {
                     scrollPane.setActor(newContentTable);
                     contentTable = newContentTable;

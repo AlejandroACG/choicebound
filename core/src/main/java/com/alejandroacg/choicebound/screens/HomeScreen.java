@@ -20,6 +20,7 @@ import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -130,27 +131,9 @@ public class HomeScreen implements Screen {
 
     private void startNewAdventure(LocalAdventure adventure) {
         game.getOverlayManager().showLoadingOverlay(stage);
-        LocalUser.LocalProgress progress = game.getLocalUser().getProgress().get(adventure.getUid());
-        if (progress != null) {
-            progress.setCurrentHero(adventure.getInitialHero());
-            progress.setCurrentCoward(adventure.getInitialCoward());
-            progress.setCurrentKiller(adventure.getInitialKiller());
-            progress.setCurrentNode("node000");
-        }
-        game.getDataManager().saveUserData(
-            game.getLocalUser(),
-            () -> {
-                Gdx.app.log("HomeScreen", "Usuario guardado en Firestore al iniciar campaña");
-                game.getResourceManager().loadAdventureArt(adventure.getUid(), () -> {
-                    game.setScreen(new AdventureScreen(game, adventure, "node000"));
-                });
-            },
-            error -> {
-                Gdx.app.error("HomeScreen", "Error al guardar usuario: " + error);
-                game.getOverlayManager().hideOverlay(game.getOverlayManager().showLoadingOverlay(stage));
-                game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("error_message"));
-            }
-        );
+        game.getResourceManager().loadAdventureArt(adventure.getUid(), () -> {
+            game.setScreen(new AdventureScreen(game, adventure, "node000"));
+        });
     }
 
     @Override
@@ -174,8 +157,8 @@ public class HomeScreen implements Screen {
                                 hasProgress = progress.getCurrentNode() != null;
                             }
 
-                            final boolean finalHasProgress = hasProgress; // Variable final para usar en lambda
-                            final String currentNodeId = hasProgress ? userProgress.get(adventure.getUid()).getCurrentNode() : "node000"; // Obtener currentNode
+                            final boolean finalHasProgress = hasProgress;
+                            final String currentNodeId = hasProgress ? userProgress.get(adventure.getUid()).getCurrentNode() : "node000";
 
                             String coverKey = isUnlocked ? adventure.getCover() : adventure.getCover() + "_locked";
                             Gdx.app.log("Adventure", "Intentando cargar la textura: " + coverKey);
