@@ -32,9 +32,7 @@ public class AdventureScreen implements Screen {
     private Table contentTable;
     private ScrollPane scrollPane;
     private final String initialNodeId;
-    private Label heroLabel;
-    private Label cowardLabel;
-    private Label killerLabel;
+    private Image alignmentIconImage;
 
     public AdventureScreen(ChoiceboundGame game, LocalAdventure adventure, String nodeId) {
         this.game = game;
@@ -62,22 +60,12 @@ public class AdventureScreen implements Screen {
         titleLabel.setFontScale(titleScale);
         titleLabel.setAlignment(Align.center);
 
-        LocalUser.LocalProgress progress = game.getLocalUser().getProgress() != null ?
-            game.getLocalUser().getProgress().get(adventure.getUid()) : null;
+        float alignmentIconImageSize = 150f;
 
-        float labelSize = 1.4f;
-
-        heroLabel = new Label(GameConfig.getString("hero") + ": " + (progress != null ? progress.getCurrentHero() : 0), game.getSkin(), "roleplay_narrative_orange");
-        heroLabel.setFontScale(labelSize);
-        heroLabel.setAlignment(Align.center);
-
-        cowardLabel = new Label(GameConfig.getString("coward") + ": " + (progress != null ? progress.getCurrentCoward() : 0), game.getSkin(), "roleplay_narrative_purple");
-        cowardLabel.setFontScale(labelSize);
-        cowardLabel.setAlignment(Align.center);
-
-        killerLabel = new Label(GameConfig.getString("killer") + ": " + (progress != null ? progress.getCurrentKiller() : 0), game.getSkin(), "roleplay_narrative_red");
-        killerLabel.setFontScale(labelSize);
-        killerLabel.setAlignment(Align.center);
+        alignmentIconImage = new Image();
+        alignmentIconImage.setScaling(Scaling.fit);
+        alignmentIconImage.setSize(alignmentIconImageSize, alignmentIconImageSize);
+        alignmentIconImage.setAlign(Align.center);
 
         TextButton backButton = uiElementFactory.createDefaultButton(GameConfig.getString("back"));
         backButton.addListener(new ChangeListener() {
@@ -90,9 +78,7 @@ public class AdventureScreen implements Screen {
         });
 
         Table statsTable = new Table();
-        statsTable.add(heroLabel).padRight(30f);
-        statsTable.add(cowardLabel).padRight(30f);
-        statsTable.add(killerLabel);
+        statsTable.add(alignmentIconImage).size(alignmentIconImageSize, alignmentIconImageSize);
 
         Table headerContent = new Table();
         headerContent.setFillParent(true);
@@ -168,7 +154,7 @@ public class AdventureScreen implements Screen {
             }
         }
 
-        Group overlay = game.getOverlayManager().showLoadingOverlay(stage);
+        game.getOverlayManager().showLoadingOverlay(stage);
         game.getDataManager().loadNode(
             adventure.getUid(),
             nodeId,
@@ -202,13 +188,29 @@ public class AdventureScreen implements Screen {
 
                 LocalUser.LocalProgress progress = game.getLocalUser().getProgress().get(adventure.getUid());
                 if (progress != null) {
-                    heroLabel.setText(GameConfig.getString("hero") + ": " + progress.getCurrentHero());
-                    cowardLabel.setText(GameConfig.getString("coward") + ": " + progress.getCurrentCoward());
-                    killerLabel.setText(GameConfig.getString("killer") + ": " + progress.getCurrentKiller());
+                    int hero = progress.getCurrentHero();
+                    int coward = progress.getCurrentCoward();
+                    int killer = progress.getCurrentKiller();
+
+                    String dominantRole;
+                    if (hero > coward && hero > killer) {
+                        dominantRole = "hero";
+                    } else if (coward > hero && coward > killer) {
+                        dominantRole = "coward";
+                    } else if (killer > hero && killer > coward) {
+                        dominantRole = "killer";
+                    } else {
+                        dominantRole = "neutral";
+                    }
+
+                    TextureRegion roleIconRegion = game.getResourceManager().getAtlas("adventure0_art").findRegion("adventure0_" + dominantRole + "_icon");
+                    if (roleIconRegion != null) {
+                        alignmentIconImage.setDrawable(new TextureRegionDrawable(roleIconRegion));
+                    } else {
+                        alignmentIconImage.setDrawable(null);
+                    }
                 } else {
-                    heroLabel.setText(GameConfig.getString("hero") + ": 0");
-                    cowardLabel.setText(GameConfig.getString("coward") + ": 0");
-                    killerLabel.setText(GameConfig.getString("killer") + ": 0");
+                    alignmentIconImage.setDrawable(null);
                 }
 
                 for (LocalNode.LocalChoice choice : currentNode.getChoices()) {

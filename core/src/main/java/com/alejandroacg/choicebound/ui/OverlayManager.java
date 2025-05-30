@@ -142,4 +142,43 @@ public class OverlayManager {
             }
         });
     }
+
+    public void showTempMessageOverlay(Stage stage, String messageText) {
+        Group overlayGroup = showOverlay(stage);
+
+        Label.LabelStyle baseStyle = skin.get("overlay_message", Label.LabelStyle.class);
+        BitmapFont safeFont = new BitmapFont(baseStyle.font.getData(), baseStyle.font.getRegions(), baseStyle.font.usesIntegerPositions());
+        safeFont.getData().setScale(1f);
+        Label.LabelStyle protectedStyle = new Label.LabelStyle(safeFont, baseStyle.fontColor);
+
+        Label message = new Label(messageText, protectedStyle);
+        message.setWrap(true);
+        message.setAlignment(Align.center);
+
+        float maxTextWidth = stage.getWidth() * 0.9f;
+        message.setWidth(maxTextWidth);
+        message.layout();
+
+        float textHeight = message.getPrefHeight();
+        float paddingY = textHeight * 0.3f;
+
+        float bgWidth = maxTextWidth + 20f;
+        float bgHeight = textHeight + paddingY * 2;
+
+        float bgX = (stage.getWidth() - bgWidth) / 2;
+        float bgY = stage.getHeight() * 0.5f;
+
+        TextureRegionDrawable messageBgDrawable = new TextureRegionDrawable(
+            game.getResourceManager().getAtlas("ui_pre_loaded").findRegion("message_box_bg"));
+
+        Image messageBg = new Image(messageBgDrawable);
+        messageBg.setBounds(bgX, bgY, bgWidth, bgHeight);
+        overlayGroup.addActor(messageBg);
+
+        message.setPosition(
+            (stage.getWidth() - message.getWidth()) / 2,
+            bgY + paddingY
+        );
+        overlayGroup.addActor(message);
+    }
 }

@@ -133,7 +133,8 @@ public class HomeScreen implements Screen {
     }
 
     private void startNewAdventure(LocalAdventure adventure) {
-        game.getOverlayManager().showLoadingOverlay(stage);
+        game.getOverlayManager().showTempMessageOverlay(stage,
+            "\n" + GameConfig.getString("loading") + " " + adventure.getTitle() + "...\n");
         game.getResourceManager().loadAdventureArt(adventure.getUid(), () -> {});
         awaitingAtlasLoad = true;
         pendingAdventure = adventure;
@@ -213,7 +214,8 @@ public class HomeScreen implements Screen {
                                 @Override
                                 public void changed(ChangeEvent event, Actor actor) {
                                     if (game.getConnectivityChecker().checkConnectivity(stage)) {
-                                        game.getOverlayManager().showLoadingOverlay(stage);
+                                        game.getOverlayManager().showTempMessageOverlay(stage,
+                                            "\n" + GameConfig.getString("loading") + " " + adventure.getTitle() + "...\n");
                                         game.getResourceManager().loadAdventureArt(adventure.getUid(), () -> {});
                                         awaitingAtlasLoad = true;
                                         pendingAdventure = adventure;
