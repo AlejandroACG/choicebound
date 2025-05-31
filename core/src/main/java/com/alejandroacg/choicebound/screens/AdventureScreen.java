@@ -259,6 +259,7 @@ public class AdventureScreen implements Screen {
                                 if (game.getConnectivityChecker().checkConnectivity(stage)) {
                                     game.getOverlayManager().showLoadingOverlay(stage);
 
+                                    String nextNodeId = choice.getNextNodeId() == null ? "node_wip" : choice.getNextNodeId();
                                     LocalUser.LocalProgress progress = game.getLocalUser().getProgress().get(adventure.getUid());
                                     if (progress != null) {
                                         if (choice.getModifierHero() != null) {
@@ -273,7 +274,10 @@ public class AdventureScreen implements Screen {
                                         if (choice.getTriggerToSet() != null) {
                                             progress.getTriggers().add(choice.getTriggerToSet());
                                         }
-                                        progress.setCurrentNode(choice.getNextNodeId());
+                                        if (choice.getTriggerToRemove() != null) {
+                                            progress.getTriggers().remove(choice.getTriggerToRemove());
+                                        }
+                                        progress.setCurrentNode(nextNodeId);
                                     }
 
                                     game.getDataManager().saveUserData(
@@ -281,7 +285,7 @@ public class AdventureScreen implements Screen {
                                         () -> {
                                             Gdx.app.log("AdventureScreen", "Usuario guardado en Firestore tras elegir opción");
                                             game.getOverlayManager().hideLoadingOverlay();
-                                            loadNode(choice.getNextNodeId());
+                                            loadNode(nextNodeId);
                                         },
                                         error -> {
                                             Gdx.app.error("AdventureScreen", "Error al guardar usuario: " + error);
@@ -305,6 +309,14 @@ public class AdventureScreen implements Screen {
                 Gdx.app.error("AdventureScreen", "Error al cargar nodo: " + error);
                 game.getOverlayManager().hideLoadingOverlay();
                 game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("error_message"));
+
+                // Fallback automático a node_wip si no es ya node_wip
+                if (!"node_wip".equals(nodeId)) {
+                    Gdx.app.log("AdventureScreen", "Intentando cargar nodo de reemplazo: node_wip");
+                    loadNode("node_wip");
+                } else {
+                    game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("error_message"));
+                }
             }
         );
     }

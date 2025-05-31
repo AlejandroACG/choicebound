@@ -245,6 +245,7 @@ public class DataManager {
                             choice.setModifierCoward(choiceDTO.modifier_coward);
                             choice.setModifierKiller(choiceDTO.modifier_killer);
                             choice.setTriggerToSet(choiceDTO.trigger_to_set);
+                            choice.setTriggerToRemove(choiceDTO.trigger_to_remove);
                             choice.setConditionHero(choiceDTO.condition_hero);
                             choice.setConditionCoward(choiceDTO.condition_coward);
                             choice.setConditionKiller(choiceDTO.condition_killer);

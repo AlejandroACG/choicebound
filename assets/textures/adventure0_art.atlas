@@ -64,9 +64,9 @@ bounds:964,1086,960,540
 adventure0_scene_052
 bounds:2,2,960,540
 adventure0_scene_091
-bounds:964,544,960,540
-adventure0_scene_118
 bounds:964,2,960,540
+adventure0_scene_118
+bounds:964,544,960,540
 adventure0_scene_210
 bounds:2,544,960,540
 
@@ -176,11 +176,11 @@ bounds:2,1086,960,540
 adventure0_scene_092
 bounds:2,2,960,540
 adventure0_scene_171
-bounds:964,1086,960,540
+bounds:964,544,960,540
 adventure0_scene_211
 bounds:2,544,960,540
 adventure0_scene_237
-bounds:964,544,960,540
+bounds:964,1086,960,540
 
 adventure0_art12.png
 size:2048,2048
@@ -195,3 +195,5 @@ adventure0_scene_137
 bounds:2,2,960,540
 adventure0_scene_death
 bounds:964,652,768,432
+adventure0_scene_wip
+bounds:964,218,768,432

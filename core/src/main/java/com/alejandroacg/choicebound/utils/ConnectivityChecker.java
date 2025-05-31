@@ -1,8 +1,8 @@
 package com.alejandroacg.choicebound.utils;
 
 import com.alejandroacg.choicebound.ChoiceboundGame;
+import com.alejandroacg.choicebound.screens.SplashScreen;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.alejandroacg.choicebound.screens.HomeScreen;
 
 public class ConnectivityChecker {
     private final ChoiceboundGame game;
@@ -22,7 +22,7 @@ public class ConnectivityChecker {
     public boolean checkConnectivityWithRedirect() {
         boolean isConnected = game.getPlatformBridge().hasInternetConnection();
         if (!isConnected) {
-            game.setScreen(new HomeScreen(game));
+            game.setScreen(new SplashScreen(game));
         }
 
         return isConnected;
