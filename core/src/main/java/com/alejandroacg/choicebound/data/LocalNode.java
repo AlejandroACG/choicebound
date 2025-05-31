@@ -26,8 +26,8 @@ public class LocalNode {
         private Integer modifierHero;
         private Integer modifierCoward;
         private Integer modifierKiller;
-        private String triggerToSet;
-        private String triggerToRemove;
+        private List<String> triggerToSet;
+        private List<String> triggerToRemove;
         private Integer conditionHero;
         private Integer conditionCoward;
         private Integer conditionKiller;

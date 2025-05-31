@@ -129,18 +129,15 @@ public class AdventureScreen implements Screen {
             return;
         }
 
-        // Resetear el progreso y guardar si es el nodo inicial ("node000")
         if ("node000".equals(nodeId)) {
             LocalUser.LocalProgress progress = game.getLocalUser().getProgress().get(adventure.getUid());
             if (progress != null) {
-                // Resetear todos los valores del progreso
                 progress.setCurrentHero(adventure.getInitialHero());
                 progress.setCurrentCoward(adventure.getInitialCoward());
                 progress.setCurrentKiller(adventure.getInitialKiller());
                 progress.setCurrentNode("node000");
                 progress.setTriggers(new HashSet<>());
 
-                // Guardar el progreso actualizado en Firestore
                 game.getDataManager().saveUserData(
                     game.getLocalUser(),
                     () -> {
@@ -207,9 +204,11 @@ public class AdventureScreen implements Screen {
                     if (roleIconRegion != null) {
                         alignmentIconImage.setDrawable(new TextureRegionDrawable(roleIconRegion));
                     } else {
+                        Gdx.app.error("AdventureScreen", "Textura no encontrada: adventure0_" + dominantRole + "_icon");
                         alignmentIconImage.setDrawable(null);
                     }
                 } else {
+                    Gdx.app.error("AdventureScreen", "Progreso nulo para aventura: " + adventure.getUid());
                     alignmentIconImage.setDrawable(null);
                 }
 
@@ -271,11 +270,11 @@ public class AdventureScreen implements Screen {
                                         if (choice.getModifierKiller() != null) {
                                             progress.setCurrentKiller(progress.getCurrentKiller() + choice.getModifierKiller());
                                         }
-                                        if (choice.getTriggerToSet() != null) {
-                                            progress.getTriggers().add(choice.getTriggerToSet());
+                                        if (choice.getTriggerToSet() != null && !choice.getTriggerToSet().isEmpty()) {
+                                            progress.getTriggers().addAll(choice.getTriggerToSet());
                                         }
-                                        if (choice.getTriggerToRemove() != null) {
-                                            progress.getTriggers().remove(choice.getTriggerToRemove());
+                                        if (choice.getTriggerToRemove() != null && !choice.getTriggerToRemove().isEmpty()) {
+                                            progress.getTriggers().removeAll(choice.getTriggerToRemove());
                                         }
                                         progress.setCurrentNode(nextNodeId);
                                     }
@@ -310,7 +309,6 @@ public class AdventureScreen implements Screen {
                 game.getOverlayManager().hideLoadingOverlay();
                 game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("error_message"));
 
-                // Fallback automático a node_wip si no es ya node_wip
                 if (!"node_wip".equals(nodeId)) {
                     Gdx.app.log("AdventureScreen", "Intentando cargar nodo de reemplazo: node_wip");
                     loadNode("node_wip");

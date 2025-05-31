@@ -96,8 +96,8 @@ public interface DatabaseInterface {
         public Integer modifier_hero;
         public Integer modifier_coward;
         public Integer modifier_killer;
-        public String trigger_to_set;
-        public String trigger_to_remove;
+        public List<String> trigger_to_set;
+        public List<String> trigger_to_remove;
         public Integer condition_hero;
         public Integer condition_coward;
         public Integer condition_killer;
@@ -112,12 +112,14 @@ public interface DatabaseInterface {
             this.modifier_hero = modifier_hero;
             this.modifier_coward = modifier_coward;
             this.modifier_killer = modifier_killer;
+            this.trigger_to_set = new ArrayList<>();
+            this.trigger_to_remove = new ArrayList<>();
             this.condition_triggers_positive = new ArrayList<>();
             this.condition_triggers_negative = new ArrayList<>();
         }
 
         public ChoiceDTO(String text_en, String text_es, String next_node_id, Integer modifier_hero, Integer modifier_coward, Integer modifier_killer,
-                         String trigger_to_set, String trigger_to_remove, Integer condition_hero, Integer condition_coward, Integer condition_killer,
+                         List<String> trigger_to_set, List<String> trigger_to_remove, Integer condition_hero, Integer condition_coward, Integer condition_killer,
                          List<String> condition_triggers_positive, List<String> condition_triggers_negative) {
             this.text_en = text_en;
             this.text_es = text_es;
@@ -125,8 +127,8 @@ public interface DatabaseInterface {
             this.modifier_hero = modifier_hero;
             this.modifier_coward = modifier_coward;
             this.modifier_killer = modifier_killer;
-            this.trigger_to_set = trigger_to_set;
-            this.trigger_to_remove = trigger_to_remove;
+            this.trigger_to_set = trigger_to_set != null ? trigger_to_set : new ArrayList<>();
+            this.trigger_to_remove = trigger_to_remove != null ? trigger_to_remove : new ArrayList<>();
             this.condition_hero = condition_hero;
             this.condition_coward = condition_coward;
             this.condition_killer = condition_killer;
