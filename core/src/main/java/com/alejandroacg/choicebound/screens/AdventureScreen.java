@@ -120,6 +120,7 @@ public class AdventureScreen implements Screen {
     }
 
     private void loadNode(String nodeId) {
+        game.getOverlayManager().showLoadingOverlay(stage);
         if (!game.getConnectivityChecker().checkConnectivityWithRedirect()) return;
 
         if ("last_node".equals(nodeId)) {
@@ -156,6 +157,7 @@ public class AdventureScreen implements Screen {
                 if (!"node_wip".equals(nodeId)) loadNode("node_wip");
             }
         );
+        game.getOverlayManager().hideLoadingOverlay();
     }
 
     private void updateImage() {
