@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -24,18 +25,16 @@ public class LocalUser {
         private String adventureId;
         private boolean unlocked;
         private String currentNode;
-        private int currentHero;
-        private int currentCoward;
-        private int currentKiller;
+        private String lastNode;
+        private Map<String, Integer> currentValues;
         private Set<String> triggers;
 
-        public LocalProgress(String adventureId, boolean unlocked, String currentNode, int currentHero, int currentCoward, int currentKiller) {
+        public LocalProgress(String adventureId, boolean unlocked, String currentNode, Map<String, Integer> values) {
             this.adventureId = adventureId;
             this.unlocked = unlocked;
             this.currentNode = currentNode;
-            this.currentHero = currentHero;
-            this.currentCoward = currentCoward;
-            this.currentKiller = currentKiller;
+            this.lastNode = null;
+            this.currentValues = values != null ? new HashMap<>(values) : new HashMap<>();
             this.triggers = new HashSet<>();
         }
     }

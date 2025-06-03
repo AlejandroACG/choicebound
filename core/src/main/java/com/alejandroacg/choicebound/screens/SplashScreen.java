@@ -92,18 +92,14 @@ public class SplashScreen implements Screen {
 
     public void onSignInSuccess() {
         Gdx.app.log("SplashScreen", "Sign In exitoso, cargando datos del usuario");
-        game.getDataManager().loadUserDataFromFirestore(
+        game.getUserDataManager().loadUserDataFromFirestore(
             () -> {
-                // Éxito: datos cargados, ahora redirigir a HomeScreen
                 Gdx.app.log("SplashScreen", "Datos cargados, cambiando a la pantalla principal");
                 game.getMusicManager().stop();
                 Gdx.app.postRunnable(() -> game.setScreen(new HomeScreen(game)));
             },
             error -> {
-                // Error al cargar datos, ejecutar signOut
-                Gdx.app.log("SplashScreen", "Error al cargar datos del usuario: " + error);
-                game.getPlatformBridge().signOut();
-                game.getOverlayManager().hideLoadingOverlay();
+                handleFailedAuth("Fallo en el sign in: " + error);
             }
         );
     }
@@ -111,7 +107,6 @@ public class SplashScreen implements Screen {
     public void onFirstSignInSuccess() {
         Gdx.app.log("SplashScreen", "First Sign In exitoso, cambiando a la pantalla de registro");
         game.getLocalUser().setUid(game.getPlatformBridge().getCurrentUserId());
-        // Encolar el cambio de pantalla en el hilo principal
         game.getMusicManager().stop();
         Gdx.app.postRunnable(() -> game.setScreen(new SignUpScreen(game)));
     }
@@ -151,27 +146,23 @@ public class SplashScreen implements Screen {
                 game.getOverlayManager().hideLoadingOverlay();
                 String uid = game.getPlatformBridge().getCurrentUserId();
 
-                // Verificar conectividad antes de autenticación
                 if (game.getConnectivityChecker().checkConnectivity(stage) && game.getPlatformBridge().isUserAuthenticated() && uid != null) {
+                    game.getOverlayManager().showLoadingOverlay(stage);
                     game.getDatabase().doesUserExist(
                         uid,
                         exists -> {
                             if (exists) {
                                 onSignInSuccess();
                             } else {
-                                game.getPlatformBridge().signOut();
-                                game.getOverlayManager().hideLoadingOverlay();
+                                handleFailedAuth("Fallo en el sign in: User no existe en la base de datos");
                             }
                         },
                         error -> {
-                            Gdx.app.error("SplashScreen", "Error al verificar existencia de usuario: " + error);
-                            game.getPlatformBridge().signOut();
-                            game.getOverlayManager().hideLoadingOverlay();
+                            handleFailedAuth("Fallo en el sign in: " + error);
                         }
                     );
                 } else {
-                    game.getPlatformBridge().signOut();
-                    game.getOverlayManager().hideLoadingOverlay();
+                    handleFailedAuth("Fallo en el sign in: No hay conexión a internet");
                 }
             }
 
@@ -217,5 +208,11 @@ public class SplashScreen implements Screen {
     public void dispose() {
         batch.dispose();
         stage.dispose();
+    }
+
+    private void handleFailedAuth(String logMessage) {
+        Gdx.app.log("SplashScreen", logMessage);
+        game.getPlatformBridge().signOut();
+        game.getOverlayManager().hideLoadingOverlay();
     }
 }

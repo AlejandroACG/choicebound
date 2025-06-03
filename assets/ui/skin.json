@@ -58,6 +58,10 @@
       "font": "crimson_text",
       "fontColor": "crimson"
     },
+    "current_lives": {
+      "font": "cinzel",
+      "fontColor": "crimson"
+    },
     "roleplay_button": {
       "font": "cinzel",
       "fontColor": "black"

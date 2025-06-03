@@ -194,15 +194,15 @@ public class FirestoreDatabase implements DatabaseInterface {
     }
 
     @Override
-    public void readChoices(String adventureId, String nodeId, Consumer<List<ChoiceDTO>> onSuccess, Consumer<String> onError) {
+    public void readChoices(String adventureId, String nodeId, Consumer<List<Map.Entry<String, ChoiceDTO>>> onSuccess, Consumer<String> onError) {
         db.collection("adventures").document(adventureId).collection("nodes").document(nodeId).collection("choices")
             .get()
             .addOnSuccessListener(querySnapshot -> {
-                List<ChoiceDTO> choices = new ArrayList<>();
+                List<Map.Entry<String, ChoiceDTO>> choices = new ArrayList<>();
                 for (var doc : querySnapshot.getDocuments()) {
                     ChoiceDTO choice = doc.toObject(ChoiceDTO.class);
                     if (choice != null) {
-                        choices.add(choice);
+                        choices.add(new AbstractMap.SimpleEntry<>(doc.getId(), choice));
                     }
                 }
                 Gdx.app.log("FirestoreDatabase", "Opciones cargadas para nodo " + nodeId + ": " + choices.size());

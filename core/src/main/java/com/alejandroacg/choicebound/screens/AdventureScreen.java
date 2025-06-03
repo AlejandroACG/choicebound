@@ -5,9 +5,9 @@ import com.alejandroacg.choicebound.data.LocalAdventure;
 import com.alejandroacg.choicebound.data.LocalNode;
 import com.alejandroacg.choicebound.data.LocalUser;
 import com.alejandroacg.choicebound.ui.UIElementFactory;
+import com.alejandroacg.choicebound.utils.ConditionEvaluator;
 import com.alejandroacg.choicebound.utils.GameConfig;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -19,7 +19,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-import java.util.HashSet;
+import java.util.*;
 
 public class AdventureScreen implements Screen {
     private final ChoiceboundGame game;
@@ -33,6 +33,7 @@ public class AdventureScreen implements Screen {
     private ScrollPane scrollPane;
     private final String initialNodeId;
     private Image alignmentIconImage;
+    private Label currentLivesLabel;
 
     public AdventureScreen(ChoiceboundGame game, LocalAdventure adventure, String nodeId) {
         this.game = game;
@@ -54,18 +55,44 @@ public class AdventureScreen implements Screen {
         float screenHeight = Gdx.graphics.getHeight();
         float titleScale = 3f;
 
+        Table header = createHeader(titleScale);
+        mainTable.add(header).height(screenHeight * GameConfig.HEADER_HEIGHT_RATIO).width(Gdx.graphics.getWidth()).expandX().fillX().padTop(0).row();
+
+        image = new Image();
+        image.setScaling(Scaling.fillX);
+        image.setAlign(Align.center);
+        mainTable.add(image).expandX().fillX().height(screenHeight * 0.3f).padTop(0).row();
+
+        contentTable = new Table();
+        scrollPane = new ScrollPane(contentTable);
+        scrollPane.setFadeScrollBars(false);
+        scrollPane.setScrollingDisabled(true, false);
+
+        Table scrollWrapper = new Table();
+        scrollWrapper.add(scrollPane).expand().fill();
+
+        Container<Table> parchmentContainer = new Container<>(scrollWrapper);
+        parchmentContainer.setBackground(new TextureRegionDrawable(game.getResourceManager().getAtlas("ui").findRegion("container_parchment")));
+        parchmentContainer.padTop(150f).padBottom(200f);
+
+        mainTable.add(parchmentContainer).width(Gdx.graphics.getWidth() * 0.9f).padTop(20f).row();
+    }
+
+    private Table createHeader(float titleScale) {
         Table header = uiElementFactory.createHeader();
 
         Label titleLabel = uiElementFactory.createTitleLabel(adventure.getTitle());
         titleLabel.setFontScale(titleScale);
         titleLabel.setAlignment(Align.center);
 
-        float alignmentIconImageSize = 150f;
-
         alignmentIconImage = new Image();
         alignmentIconImage.setScaling(Scaling.fit);
-        alignmentIconImage.setSize(alignmentIconImageSize, alignmentIconImageSize);
+        alignmentIconImage.setSize(150f, 150f);
         alignmentIconImage.setAlign(Align.center);
+
+        currentLivesLabel = new Label("", game.getSkin(), "current_lives");
+        currentLivesLabel.setFontScale(1.5f);
+        currentLivesLabel.setAlignment(Align.left);
 
         TextButton backButton = uiElementFactory.createDefaultButton(GameConfig.getString("back"));
         backButton.addListener(new ChangeListener() {
@@ -78,7 +105,8 @@ public class AdventureScreen implements Screen {
         });
 
         Table statsTable = new Table();
-        statsTable.add(alignmentIconImage).size(alignmentIconImageSize, alignmentIconImageSize);
+        statsTable.add(alignmentIconImage).size(150f);
+        statsTable.add(currentLivesLabel).padLeft(20f).align(Align.left);
 
         Table headerContent = new Table();
         headerContent.setFillParent(true);
@@ -88,266 +116,183 @@ public class AdventureScreen implements Screen {
         headerContent.add(backButton).padTop(10).padBottom(30);
 
         header.addActor(headerContent);
-
-        mainTable.add(header)
-            .height(screenHeight * GameConfig.HEADER_HEIGHT_RATIO)
-            .width(Gdx.graphics.getWidth())
-            .expandX()
-            .fillX()
-            .padTop(0)
-            .row();
-
-        image = new Image();
-        image.setScaling(Scaling.fillX);
-        image.setAlign(Align.center);
-        mainTable.add(image)
-            .expandX()
-            .fillX()
-            .height(screenHeight * 0.3f)
-            .padTop(0)
-            .padLeft(0)
-            .padRight(0)
-            .row();
-
-        contentTable = new Table();
-        scrollPane = new ScrollPane(contentTable);
-        scrollPane.setFadeScrollBars(false);
-        scrollPane.setScrollingDisabled(true, false);
-
-        Table scrollWrapper = new Table();
-        scrollWrapper.add(scrollPane).expand().fill();
-
-        Container<Table> parchmentContainer = new Container<>(scrollWrapper);
-        parchmentContainer.setBackground(new TextureRegionDrawable(game.getResourceManager().getAtlas("ui").findRegion("container_parchment")));
-        parchmentContainer.padTop(150f).padBottom(200f).padLeft(0f).padRight(0f);
-
-        mainTable.add(parchmentContainer).width(Gdx.graphics.getWidth() * 0.9f).padTop(20f).row();
+        return header;
     }
 
     private void loadNode(String nodeId) {
-        if (!game.getConnectivityChecker().checkConnectivityWithRedirect()) {
+        if (!game.getConnectivityChecker().checkConnectivityWithRedirect()) return;
+
+        if ("last_node".equals(nodeId)) {
+            LocalUser.LocalProgress progress = game.getLocalUser().getProgress().get(adventure.getUid());
+            loadNode(progress != null ? progress.getLastNode() : "node000");
             return;
         }
 
         if ("node000".equals(nodeId)) {
             LocalUser.LocalProgress progress = game.getLocalUser().getProgress().get(adventure.getUid());
             if (progress != null) {
-                progress.setCurrentHero(adventure.getInitialHero());
-                progress.setCurrentCoward(adventure.getInitialCoward());
-                progress.setCurrentKiller(adventure.getInitialKiller());
+                progress.setCurrentValues(new HashMap<>());
+                if (adventure.getInitialValues() != null) {
+                    progress.getCurrentValues().putAll(adventure.getInitialValues());
+                }
                 progress.setCurrentNode("node000");
                 progress.setTriggers(new HashSet<>());
-
-                game.getDataManager().saveUserData(
-                    game.getLocalUser(),
-                    () -> {
-                        Gdx.app.log("AdventureScreen", "Usuario guardado en Firestore al iniciar nueva aventura");
-                    },
-                    error -> {
-                        Gdx.app.error("AdventureScreen", "Error al guardar usuario al iniciar aventura: " + error);
-                        game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("error_message"));
-                    }
-                );
+                game.getUserDataManager().saveUserData(game.getLocalUser(), () -> {}, error -> game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("error_message")));
             }
         }
 
         game.getOverlayManager().showLoadingOverlay(stage);
-        game.getDataManager().loadNode(
-            adventure.getUid(),
-            nodeId,
+        game.getNodeDataManager().loadNode(
+            adventure.getUid(), nodeId,
             node -> {
                 currentNode = node;
-                Gdx.app.log("AdventureScreen", "Nodo cargado: " + nodeId);
                 game.getOverlayManager().hideLoadingOverlay();
-
-                Gdx.app.log("AdventureScreen", "Intentando cargar imagen: " + currentNode.getImage());
-                TextureRegion imageRegion = game.getResourceManager().getAtlas(adventure.getUid() + "_art").findRegion(currentNode.getImage());
-                if (imageRegion != null) {
-                    Gdx.app.log("AdventureScreen", "Imagen cargada correctamente: " + currentNode.getImage());
-                    Gdx.app.log("AdventureScreen", "Dimensiones de la región: " + imageRegion.getRegionWidth() + "x" + imageRegion.getRegionHeight());
-                    image.setDrawable(new TextureRegionDrawable(imageRegion));
-                } else {
-                    Gdx.app.error("AdventureScreen", "Imagen no encontrada para el nodo: " + currentNode.getImage());
-                    image.setDrawable(null);
-                }
-
-                if (currentNode.getMusic() != null) {
-                    game.getMusicManager().playIfDifferent(currentNode.getMusic());
-                }
-
-                Table newContentTable = new Table();
-                newContentTable.setWidth(Gdx.graphics.getWidth() * 0.8f);
-                Label descriptionLabel = new Label(currentNode.getText(), game.getSkin(), "roleplay_narrative_light_grey");
-                descriptionLabel.setFontScale(1.1f);
-                descriptionLabel.setWrap(true);
-                descriptionLabel.setAlignment(Align.center);
-                newContentTable.add(descriptionLabel).expandX().fillX().minHeight(100f).padBottom(40f).row();
-
-                LocalUser.LocalProgress progress = game.getLocalUser().getProgress().get(adventure.getUid());
-                if (progress != null) {
-                    int hero = progress.getCurrentHero();
-                    int coward = progress.getCurrentCoward();
-                    int killer = progress.getCurrentKiller();
-
-                    String dominantRole;
-                    if (hero > coward && hero > killer) {
-                        dominantRole = "hero";
-                    } else if (coward > hero && coward > killer) {
-                        dominantRole = "coward";
-                    } else if (killer > hero && killer > coward) {
-                        dominantRole = "killer";
-                    } else {
-                        dominantRole = "neutral";
-                    }
-
-                    TextureRegion roleIconRegion = game.getResourceManager().getAtlas("adventure0_art").findRegion("adventure0_" + dominantRole + "_icon");
-                    if (roleIconRegion != null) {
-                        alignmentIconImage.setDrawable(new TextureRegionDrawable(roleIconRegion));
-                    } else {
-                        Gdx.app.error("AdventureScreen", "Textura no encontrada: adventure0_" + dominantRole + "_icon");
-                        alignmentIconImage.setDrawable(null);
-                    }
-                } else {
-                    Gdx.app.error("AdventureScreen", "Progreso nulo para aventura: " + adventure.getUid());
-                    alignmentIconImage.setDrawable(null);
-                }
-
-                for (LocalNode.LocalChoice choice : currentNode.getChoices()) {
-                    boolean showChoice = true;
-
-                    if (choice.getConditionHero() != null && progress != null) {
-                        if (progress.getCurrentHero() < choice.getConditionHero()) {
-                            showChoice = false;
-                        }
-                    }
-                    if (choice.getConditionCoward() != null && progress != null) {
-                        if (progress.getCurrentCoward() < choice.getConditionCoward()) {
-                            showChoice = false;
-                        }
-                    }
-                    if (choice.getConditionKiller() != null && progress != null) {
-                        if (progress.getCurrentKiller() < choice.getConditionKiller()) {
-                            showChoice = false;
-                        }
-                    }
-
-                    if (choice.getConditionTriggersPositive() != null && !choice.getConditionTriggersPositive().isEmpty() && progress != null) {
-                        for (String trigger : choice.getConditionTriggersPositive()) {
-                            if (!progress.getTriggers().contains(trigger)) {
-                                showChoice = false;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (choice.getConditionTriggersNegative() != null && !choice.getConditionTriggersNegative().isEmpty() && progress != null) {
-                        for (String trigger : choice.getConditionTriggersNegative()) {
-                            if (progress.getTriggers().contains(trigger)) {
-                                showChoice = false;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (showChoice) {
-                        TextButton choiceButton = uiElementFactory.createDefaultButton(choice.getText());
-                        choiceButton.getLabel().setWrap(true);
-                        choiceButton.addListener(new ChangeListener() {
-                            @Override
-                            public void changed(ChangeEvent event, Actor actor) {
-                                if (game.getConnectivityChecker().checkConnectivity(stage)) {
-                                    game.getOverlayManager().showLoadingOverlay(stage);
-
-                                    String nextNodeId = choice.getNextNodeId() == null ? "node_wip" : choice.getNextNodeId();
-                                    LocalUser.LocalProgress progress = game.getLocalUser().getProgress().get(adventure.getUid());
-                                    if (progress != null) {
-                                        if (choice.getModifierHero() != null) {
-                                            progress.setCurrentHero(progress.getCurrentHero() + choice.getModifierHero());
-                                        }
-                                        if (choice.getModifierCoward() != null) {
-                                            progress.setCurrentCoward(progress.getCurrentCoward() + choice.getModifierCoward());
-                                        }
-                                        if (choice.getModifierKiller() != null) {
-                                            progress.setCurrentKiller(progress.getCurrentKiller() + choice.getModifierKiller());
-                                        }
-                                        if (choice.getTriggerToSet() != null && !choice.getTriggerToSet().isEmpty()) {
-                                            progress.getTriggers().addAll(choice.getTriggerToSet());
-                                        }
-                                        if (choice.getTriggerToRemove() != null && !choice.getTriggerToRemove().isEmpty()) {
-                                            progress.getTriggers().removeAll(choice.getTriggerToRemove());
-                                        }
-                                        progress.setCurrentNode(nextNodeId);
-                                    }
-
-                                    game.getDataManager().saveUserData(
-                                        game.getLocalUser(),
-                                        () -> {
-                                            Gdx.app.log("AdventureScreen", "Usuario guardado en Firestore tras elegir opción");
-                                            game.getOverlayManager().hideLoadingOverlay();
-                                            loadNode(nextNodeId);
-                                        },
-                                        error -> {
-                                            Gdx.app.error("AdventureScreen", "Error al guardar usuario: " + error);
-                                            game.getOverlayManager().hideLoadingOverlay();
-                                            game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("error_message"));
-                                        }
-                                    );
-                                }
-                            }
-                        });
-                        newContentTable.add(choiceButton).expandX().fillX().width(Gdx.graphics.getWidth() * 0.8f).padBottom(10f).row();
-                    }
-                }
-
-                Gdx.app.postRunnable(() -> {
-                    scrollPane.setActor(newContentTable);
-                    contentTable = newContentTable;
-                });
+                updateImage();
+                updateHeaderStats();
+                updateContentTable();
             },
             error -> {
-                Gdx.app.error("AdventureScreen", "Error al cargar nodo: " + error);
                 game.getOverlayManager().hideLoadingOverlay();
-                game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("error_message"));
-
-                if (!"node_wip".equals(nodeId)) {
-                    Gdx.app.log("AdventureScreen", "Intentando cargar nodo de reemplazo: node_wip");
-                    loadNode("node_wip");
-                } else {
-                    game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("error_message"));
-                }
+                if (!"node_wip".equals(nodeId)) loadNode("node_wip");
             }
         );
     }
 
-    @Override
-    public void show() {
-        loadNode(initialNodeId);
+    private void updateImage() {
+        TextureRegion imageRegion = game.getResourceManager().getAtlas(adventure.getUid() + "_art").findRegion(currentNode.getImage());
+        if (imageRegion != null) {
+            image.setDrawable(new TextureRegionDrawable(imageRegion));
+        } else {
+            image.setDrawable(null);
+        }
+
+        if (currentNode.getMusic() != null) {
+            game.getMusicManager().playIfDifferent(currentNode.getMusic());
+        }
     }
 
-    @Override
-    public void render(float delta) {
+    private void updateHeaderStats() {
+        LocalUser.LocalProgress progress = game.getLocalUser().getProgress().get(adventure.getUid());
+        if (progress == null) return;
+
+        Map<String, Integer> values = progress.getCurrentValues();
+        int hero = values.getOrDefault("hero", 0);
+        int coward = values.getOrDefault("coward", 0);
+        int killer = values.getOrDefault("killer", 0);
+        int lives = values.getOrDefault("lives", 0);
+
+        String role = (hero > coward && hero > killer) ? "hero" : (coward > killer && coward > hero) ? "coward" : (killer > hero && killer > coward) ? "killer" : "neutral";
+        TextureRegion roleRegion = game.getResourceManager().getAtlas("adventure0_art").findRegion("adventure0_" + role + "_icon");
+
+        alignmentIconImage.setDrawable(roleRegion != null ? new TextureRegionDrawable(roleRegion) : null);
+        currentLivesLabel.setText(String.valueOf(lives));
+    }
+
+    private void updateContentTable() {
+        Table newContentTable = new Table();
+        newContentTable.setWidth(Gdx.graphics.getWidth() * 0.8f);
+
+        Label descriptionLabel = new Label(currentNode.getText(), game.getSkin(), "roleplay_narrative_light_grey");
+        descriptionLabel.setFontScale(1.1f);
+        descriptionLabel.setWrap(true);
+        descriptionLabel.setAlignment(Align.center);
+        newContentTable.add(descriptionLabel).expandX().fillX().minHeight(100f).padBottom(40f).row();
+
+        ArrayList<Map.Entry<String, LocalNode.LocalChoice>> sortedChoices = new ArrayList<>(currentNode.getChoices().entrySet());
+        sortedChoices.sort(Map.Entry.comparingByKey());
+
+        LocalUser.LocalProgress progress = game.getLocalUser().getProgress().get(adventure.getUid());
+
+        for (Map.Entry<String, LocalNode.LocalChoice> entry : sortedChoices) {
+            LocalNode.LocalChoice choice = entry.getValue();
+            if (shouldShowChoice(choice, progress)) {
+                TextButton button = createChoiceButton(choice, progress);
+                newContentTable.add(button).expandX().fillX().width(Gdx.graphics.getWidth() * 0.8f).padBottom(10f).row();
+            }
+        }
+
+        Gdx.app.postRunnable(() -> {
+            scrollPane.setActor(newContentTable);
+            contentTable = newContentTable;
+        });
+    }
+
+    private boolean shouldShowChoice(LocalNode.LocalChoice choice, LocalUser.LocalProgress progress) {
+        if (progress == null) return false;
+
+        if (choice.getConditionValues() != null && !choice.getConditionValues().isEmpty()) {
+            if (!ConditionEvaluator.evaluate(choice.getConditionValues(), progress.getCurrentValues())) return false;
+        }
+
+        if (choice.getConditionTriggersPositive() != null) {
+            for (String trigger : choice.getConditionTriggersPositive()) {
+                if (!progress.getTriggers().contains(trigger)) return false;
+            }
+        }
+
+        if (choice.getConditionTriggersNegative() != null) {
+            for (String trigger : choice.getConditionTriggersNegative()) {
+                if (progress.getTriggers().contains(trigger)) return false;
+            }
+        }
+
+        return true;
+    }
+
+    private TextButton createChoiceButton(LocalNode.LocalChoice choice, LocalUser.LocalProgress progress) {
+        TextButton button = uiElementFactory.createDefaultButton(choice.getText());
+        button.getLabel().setWrap(true);
+
+        button.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                if (!game.getConnectivityChecker().checkConnectivity(stage)) return;
+
+                game.getOverlayManager().showLoadingOverlay(stage);
+                String nextNodeId = choice.getNextNodeId() == null ? "node_wip" : choice.getNextNodeId();
+
+                if (progress != null) {
+                    if (choice.getModifierValues() != null) {
+                        for (Map.Entry<String, Integer> mod : choice.getModifierValues().entrySet()) {
+                            progress.getCurrentValues().merge(mod.getKey(), mod.getValue(), Integer::sum);
+                        }
+                    }
+                    if (choice.getTriggerToSet() != null) progress.getTriggers().addAll(choice.getTriggerToSet());
+                    if (choice.getTriggerToRemove() != null) progress.getTriggers().removeAll(choice.getTriggerToRemove());
+
+                    if (!"last_node".equals(nextNodeId)) {
+                        progress.setLastNode(progress.getCurrentNode());
+                        progress.setCurrentNode(nextNodeId);
+                    } else {
+                        progress.setCurrentNode(progress.getLastNode());
+                    }
+                }
+
+                game.getUserDataManager().saveUserData(game.getLocalUser(),
+                    () -> {
+                        game.getOverlayManager().hideLoadingOverlay();
+                        loadNode(nextNodeId);
+                    },
+                    error -> {
+                        game.getOverlayManager().hideLoadingOverlay();
+                        game.getOverlayManager().showMessageOverlay(stage, GameConfig.getString("error_message"));
+                    });
+            }
+        });
+
+        return button;
+    }
+
+    @Override public void show() { loadNode(initialNodeId); }
+    @Override public void render(float delta) {
         Gdx.gl.glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         stage.act(delta);
         stage.draw();
     }
-
-    @Override
-    public void resize(int width, int height) {
-        stage.getViewport().update(width, height, true);
-    }
-
-    @Override
-    public void pause() {}
-
-    @Override
-    public void resume() {}
-
-    @Override
-    public void hide() {}
-
-    @Override
-    public void dispose() {
-        stage.dispose();
-    }
+    @Override public void resize(int width, int height) { stage.getViewport().update(width, height, true); }
+    @Override public void pause() {}
+    @Override public void resume() {}
+    @Override public void hide() {}
+    @Override public void dispose() { stage.dispose(); }
 }

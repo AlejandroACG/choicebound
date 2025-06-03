@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -15,22 +16,19 @@ public class LocalNode {
     private String text;
     private String image;
     private String music;
-    private List<LocalChoice> choices;
+    private Map<String, LocalChoice> choices;
 
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     public static class LocalChoice {
+        private String choiceId;
         private String text;
         private String nextNodeId;
-        private Integer modifierHero;
-        private Integer modifierCoward;
-        private Integer modifierKiller;
+        private Map<String, Integer> modifierValues;
         private List<String> triggerToSet;
         private List<String> triggerToRemove;
-        private Integer conditionHero;
-        private Integer conditionCoward;
-        private Integer conditionKiller;
+        private String conditionValues;
         private List<String> conditionTriggersPositive;
         private List<String> conditionTriggersNegative;
     }

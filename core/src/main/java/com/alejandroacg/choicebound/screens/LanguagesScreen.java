@@ -77,7 +77,7 @@ public class LanguagesScreen implements Screen {
                 if (game.getConnectivityChecker().checkConnectivity(stage)) {
                     GameConfig.setCurrentLanguage("en");
                     game.getLocalUser().setPrefLanguage("en");
-                    game.getDataManager().saveUserData(
+                    game.getUserDataManager().saveUserData(
                         game.getLocalUser(),
                         () -> Gdx.app.postRunnable(() -> game.setScreen(new LanguagesScreen(game))),
                         error -> Gdx.app.log("LanguagesScreen", "Error al guardar idioma: " + error)
@@ -96,7 +96,7 @@ public class LanguagesScreen implements Screen {
                 if (game.getConnectivityChecker().checkConnectivity(stage)) {
                     GameConfig.setCurrentLanguage("es");
                     game.getLocalUser().setPrefLanguage("es");
-                    game.getDataManager().saveUserData(
+                    game.getUserDataManager().saveUserData(
                         game.getLocalUser(),
                         () -> Gdx.app.postRunnable(() -> game.setScreen(new LanguagesScreen(game))),
                         error -> Gdx.app.log("LanguagesScreen", "Error al guardar idioma: " + error)

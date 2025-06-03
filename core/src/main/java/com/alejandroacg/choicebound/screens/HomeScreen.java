@@ -36,7 +36,6 @@ public class HomeScreen implements Screen {
     private LocalAdventure pendingAdventure = null;
     private String pendingNodeId = null;
 
-
     public HomeScreen(ChoiceboundGame game) {
         this.game = game;
         this.stage = new Stage(new ScreenViewport());
@@ -123,13 +122,17 @@ public class HomeScreen implements Screen {
         mainTable.add(signOutButton).padBottom(20).bottom();
     }
 
-    private void startNewAdventure(LocalAdventure adventure) {
+    private void loadAdventureAndLaunch(LocalAdventure adventure, String nodeId) {
         game.getOverlayManager().showTempMessageOverlay(stage,
             "\n" + GameConfig.getString("loading") + " " + adventure.getTitle() + "...\n");
         game.getResourceManager().loadAdventureArt(adventure.getUid(), () -> {});
         awaitingAtlasLoad = true;
         pendingAdventure = adventure;
-        pendingNodeId = "node000";
+        pendingNodeId = nodeId;
+    }
+
+    private void startNewAdventure(LocalAdventure adventure) {
+        loadAdventureAndLaunch(adventure, "node000");
     }
 
     @Override
@@ -140,7 +143,7 @@ public class HomeScreen implements Screen {
             return;
         }
 
-        game.getDataManager().loadAllAdventures(
+        game.getAdventureDataManager().loadAllAdventures(
             loadedAdventures -> {
                 adventures = loadedAdventures;
                 Gdx.app.log("HomeScreen", "Aventuras cargadas: " + adventures.size());
@@ -162,7 +165,7 @@ public class HomeScreen implements Screen {
                         String coverKey = isUnlocked ? adventure.getCover() : adventure.getCover() + "_locked";
                         Gdx.app.log("Adventure", "Intentando cargar la textura: " + coverKey);
                         TextureRegion coverRegion = game.getResourceManager().getAtlas("covers").findRegion(coverKey);
-                        Image coverImage = new Image(coverRegion);
+                        Image coverImage = coverRegion != null ? new Image(coverRegion) : new Image();
                         coverImage.setScaling(Scaling.fit);
                         coverImage.setAlign(Align.center);
 
@@ -191,9 +194,7 @@ public class HomeScreen implements Screen {
                                                 }
 
                                                 @Override
-                                                public void onCancel() {
-                                                    // No hacer nada si se cancela
-                                                }
+                                                public void onCancel() {}
                                             }
                                         );
                                         confirmationDialog.show(stage);
@@ -208,12 +209,7 @@ public class HomeScreen implements Screen {
                             @Override
                             public void changed(ChangeEvent event, Actor actor) {
                                 if (game.getConnectivityChecker().checkConnectivity(stage)) {
-                                    game.getOverlayManager().showTempMessageOverlay(stage,
-                                        "\n" + GameConfig.getString("loading") + " " + adventure.getTitle() + "...\n");
-                                    game.getResourceManager().loadAdventureArt(adventure.getUid(), () -> {});
-                                    awaitingAtlasLoad = true;
-                                    pendingAdventure = adventure;
-                                    pendingNodeId = currentNodeId;
+                                    loadAdventureAndLaunch(adventure, currentNodeId);
                                 }
                             }
                         });

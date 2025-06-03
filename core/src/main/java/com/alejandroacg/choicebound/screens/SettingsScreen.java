@@ -43,22 +43,18 @@ public class SettingsScreen implements Screen {
         mainTable.top();
         stage.addActor(mainTable);
 
-        // Crear el header
         Table header = uiElementFactory.createHeader();
 
-        // Crear y configurar el título
         Label titleLabel = uiElementFactory.createTitleLabel(GameConfig.getString("settings"));
         titleLabel.setFontScale(titleScale);
         titleLabel.setAlignment(Align.center);
 
-        // Crear una subtabla para centrar verticalmente
         Table headerContent = new Table();
         headerContent.setFillParent(true);
         headerContent.add(titleLabel).expand().center();
 
         header.addActor(headerContent);
 
-        // Añadir el header al layout principal
         mainTable.add(header)
             .height(screenHeight * HEADER_HEIGHT_RATIO)
             .width(Gdx.graphics.getWidth())
@@ -66,10 +62,8 @@ public class SettingsScreen implements Screen {
             .fillX()
             .row();
 
-        // Espacio entre el header y los botones
         mainTable.add().height(50).row();
 
-        // Botón "Eliminar cuenta"
         TextButton deleteAccountButton = uiElementFactory.createDefaultButton(GameConfig.getString("delete_account"));
         deleteAccountButton.addListener(new ChangeListener() {
             @Override
@@ -80,7 +74,7 @@ public class SettingsScreen implements Screen {
                         @Override
                         public void onConfirm() {
                             if (game.getConnectivityChecker().checkConnectivity(stage)) {
-                                game.getDataManager().deleteUserData(
+                                game.getUserDataManager().deleteUserData(
                                     () -> {
                                         Gdx.app.log("SettingsScreen", "Cuenta eliminada con éxito, redirigiendo a SplashScreen");
                                         game.signOut();
@@ -104,7 +98,6 @@ public class SettingsScreen implements Screen {
         });
         mainTable.add(deleteAccountButton).center().padBottom(20).row();
 
-        // Botón "Idiomas"
         TextButton languagesButton = uiElementFactory.createDefaultButton(GameConfig.getString("languages"));
         languagesButton.addListener(new ChangeListener() {
             @Override
@@ -115,7 +108,6 @@ public class SettingsScreen implements Screen {
         });
         mainTable.add(languagesButton).center().padBottom(20).row();
 
-        // Botón "Atrás"
         TextButton backButton = uiElementFactory.createDefaultButton(GameConfig.getString("back"));
         backButton.addListener(new ChangeListener() {
             @Override

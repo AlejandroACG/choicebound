@@ -15,8 +15,7 @@ import com.alejandroacg.choicebound.ChoiceboundGame;
 import com.alejandroacg.choicebound.ui.UIElementFactory;
 import com.alejandroacg.choicebound.utils.GameConfig;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class SignUpScreen implements Screen {
     private final ChoiceboundGame game;
@@ -64,14 +63,9 @@ public class SignUpScreen implements Screen {
 
         usernameField = uiElementFactory.createTextField();
 
-        usernameField.setTextFieldFilter(new TextField.TextFieldFilter() {
-            @Override
-            public boolean acceptChar(TextField textField, char c) {
-                if (textField.getText().length() >= MAX_USERNAME_LENGTH) {
-                    return false;
-                }
-                return Character.isLetterOrDigit(c) || c == '-' || c == '_';
-            }
+        usernameField.setTextFieldFilter((textField, c) -> {
+            if (textField.getText().length() >= MAX_USERNAME_LENGTH) return false;
+            return Character.isLetterOrDigit(c) || c == '-' || c == '_';
         });
 
         usernameField.setAlignment(Align.center);
@@ -89,25 +83,32 @@ public class SignUpScreen implements Screen {
                     if (game.getConnectivityChecker().checkConnectivity(stage)) {
                         if (!username.isEmpty()) {
                             Gdx.app.log("SignUpScreen", "Registro con username: " + username);
-                            // Inicializar el progreso para adventure0
-                            Map<String, LocalUser.LocalProgress> progressMap = new HashMap<>();
-                            progressMap.put("adventure0", new LocalUser.LocalProgress(
+
+                            Map<String, Integer> initialValues = new HashMap<>();
+                            Set<String> initialTriggers = new HashSet<>();
+
+                            LocalUser.LocalProgress initialProgress = new LocalUser.LocalProgress(
                                 "adventure0",
                                 true,
                                 null,
-                                0,
-                                0,
-                                0
-                            ));
+                                null,
+                                initialValues,
+                                initialTriggers
+                            );
+
+                            Map<String, LocalUser.LocalProgress> progressMap = new HashMap<>();
+                            progressMap.put("adventure0", initialProgress);
+
                             LocalUser potentialUser = new LocalUser(
                                 username,
                                 uid,
                                 GameConfig.getCurrentLanguage(),
                                 progressMap
                             );
-                            game.getDataManager().saveUserData(
+
+                            game.getUserDataManager().saveUserData(
                                 potentialUser,
-                                () -> onSignUpSuccess(),
+                                () -> onSignUpSuccess(potentialUser),
                                 error -> onSignUpFailure(error)
                             );
                         } else {
@@ -123,23 +124,9 @@ public class SignUpScreen implements Screen {
         table.add(registerButton).padBottom(60);
     }
 
-    private void onSignUpSuccess() {
+    private void onSignUpSuccess(LocalUser potentialUser) {
         Gdx.app.log("SignUpScreen", "Registro exitoso, redirigiendo a HomeScreen");
-        Map<String, LocalUser.LocalProgress> progressMap = new HashMap<>();
-        progressMap.put("adventure0", new LocalUser.LocalProgress(
-            "adventure0",
-            true,
-            null,
-            0,
-            0,
-            0
-        ));
-        game.setLocalUser(new LocalUser(
-            usernameField.getText(),
-            game.getPlatformBridge().getCurrentUserId(),
-            GameConfig.getCurrentLanguage(),
-            progressMap
-        ));
+        game.setLocalUser(potentialUser);
         Gdx.input.setOnscreenKeyboardVisible(false);
         Gdx.app.postRunnable(() -> game.setScreen(new HomeScreen(game)));
     }
