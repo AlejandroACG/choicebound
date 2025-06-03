@@ -1,38 +1,25 @@
 # Choicebound
 
-A [libGDX](https://libgdx.com/) project generated with [gdx-liftoff](https://github.com/libgdx/gdx-liftoff).
+**Choicebound** es una plataforma para Android diseñada para crear y consumir aventuras interactivas del tipo “Elige tu propia aventura”, con un enfoque en la flexibilidad, escalabilidad y facilidad de ampliación.  
+El proyecto ha sido desarrollado como Trabajo de Fin de Grado, siguiendo una arquitectura modular que permite añadir nuevas historias y funcionalidades sin necesidad de modificar el código base.
 
-This project was generated with a template including simple application launchers and an `ApplicationAdapter` extension that draws libGDX logo.
+## Características principales
 
-## Platforms
+- **Gestión de aventuras desde base de datos remota (Firestore)**
+- **Soporte multilenguaje (español e inglés)**
+- **Guardado automático del progreso en la nube**
+- **Interfaz de usuario adaptativa y visualmente cuidada**
+- **Preparada para integración de tienda, marketplace y anuncios en versiones futuras**
+- **Arquitectura lista para portabilidad multiplataforma**
 
-- `core`: Main module with the application logic shared by all platforms.
-- `lwjgl3`: Primary desktop platform using LWJGL3; was called 'desktop' in older docs.
-- `android`: Android mobile platform. Needs Android SDK.
-- `html`: Web platform using GWT and WebGL. Supports only Java projects.
+## Stack tecnológico
 
-## Gradle
+- **Java 8**
+- **LibGDX & Scene2D**
+- **Firebase Firestore & Firebase Auth**
+- **Herramientas:** IntelliJ IDEA, Lombok, TexturePacker, Hiero, Excalidraw
 
-This project uses [Gradle](https://gradle.org/) to manage dependencies.
-The Gradle wrapper was included, so you can run Gradle tasks using `gradlew.bat` or `./gradlew` commands.
-Useful Gradle tasks and flags:
+## Estado del proyecto
 
-- `--continue`: when using this flag, errors will not stop the tasks from running.
-- `--daemon`: thanks to this flag, Gradle daemon will be used to run chosen tasks.
-- `--offline`: when using this flag, cached dependency archives will be used.
-- `--refresh-dependencies`: this flag forces validation of all dependencies. Useful for snapshot versions.
-- `android:lint`: performs Android project validation.
-- `build`: builds sources and archives of every project.
-- `cleanEclipse`: removes Eclipse project data.
-- `cleanIdea`: removes IntelliJ project data.
-- `clean`: removes `build` folders, which store compiled classes and built archives.
-- `eclipse`: generates Eclipse project data.
-- `html:dist`: compiles GWT sources. The compiled application can be found at `html/build/dist`: you can use any HTTP server to deploy it.
-- `html:superDev`: compiles GWT sources and runs the application in SuperDev mode. It will be available at [localhost:8080/html](http://localhost:8080/html). Use only during development.
-- `idea`: generates IntelliJ project data.
-- `lwjgl3:jar`: builds application's runnable jar, which can be found at `lwjgl3/build/libs`.
-- `lwjgl3:run`: starts the application.
-- `test`: runs unit tests (if any).
-
-Note that most tasks that are not specific to a single project can be run with `name:` prefix, where the `name` should be replaced with the ID of a specific project.
-For example, `core:clean` removes `build` folder only from the `core` project.
+**Choicebound** se encuentra en fase funcional avanzada, con la arquitectura preparada para futuras expansiones (monetización, marketplace, port multiplataforma).
+Actualmente incluye una demo jugable basada en la aventura Swordbreaker.
