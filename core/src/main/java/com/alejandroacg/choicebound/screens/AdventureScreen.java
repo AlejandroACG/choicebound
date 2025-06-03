@@ -157,7 +157,6 @@ public class AdventureScreen implements Screen {
                 if (!"node_wip".equals(nodeId)) loadNode("node_wip");
             }
         );
-        game.getOverlayManager().hideLoadingOverlay();
     }
 
     private void updateImage() {
