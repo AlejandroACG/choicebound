@@ -1,5 +1,6 @@
 package com.alejandroacg.choicebound.android;
 
+import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.View;
@@ -32,6 +33,15 @@ public class AndroidLauncher extends AndroidApplication implements PlatformBridg
             int keypadHeight = screenHeight - r.bottom;
 
             keyboardHeight = keypadHeight > screenHeight * 0.15 ? keypadHeight : 0;
+        });
+
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+            throwable.printStackTrace();
+            Intent intent = new Intent(AndroidLauncher.this, AndroidLauncher.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            android.os.Process.killProcess(android.os.Process.myPid());
+            System.exit(1);
         });
     }
 
